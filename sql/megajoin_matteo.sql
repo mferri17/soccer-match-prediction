@@ -44,7 +44,7 @@ CREATE TABLE Match_full AS
     GROUP BY m.match_api_id
     HAVING
     h1.date = MAX(h1.date) AND
-    h2.date = MAX(h2.date);
+    h2.date = MAX(h2.date) AND
     h3.date = MAX(h3.date) AND
     h4.date = MAX(h4.date) AND
     h5.date = MAX(h5.date) AND
