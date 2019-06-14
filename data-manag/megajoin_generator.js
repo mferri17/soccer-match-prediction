@@ -1,18 +1,20 @@
 
+const fs = require('fs');
+
 var matchSelection = `
-            m.match_api_id,
-            m.date,`;
+            wella.match_api_id,
+            wella.date,`;
 
 var currentSelectionTemplate = `
-            TTNN.player_api_id as TTNN_player_api_id, TTNN.player_name as TTNN_player_name, TTNN.TTeigTTt as TTNN_TTeigTTt, TTNN.weigTTt as TTNN_weigTTt, 
+            TTNN.player_api_id as TTNN_player_api_id, pa.player_name as TTNN_player_name, pa.height as TTNN_height, pa.weight as TTNN_weight, 
             TTNN.date as TTNN_date, TTNN.overall_rating as TTNN_overall_rating, TTNN.potential as TTNN_potential, TTNN.preferred_foot as TTNN_preferred_foot, 
             TTNN.attacking_work_rate as TTNN_attacking_work_rate, TTNN.defensive_work_rate as TTNN_defensive_work_rate, TTNN.crossing as TTNN_crossing, 
-            TTNN.finisTTing as TTNN_finisTTing, TTNN.TTeading_accuracy as TTNN_TTeading_accuracy, TTNN.sTTort_passing as TTNN_sTTort_passing, 
+            TTNN.finishing as TTNN_finishing, TTNN.heading_accuracy as TTNN_heading_accuracy, TTNN.short_passing as TTNN_short_passing, 
             TTNN.volleys as TTNN_volleys, TTNN.dribbling as TTNN_dribbling, TTNN.curve as TTNN_curve, TTNN.free_kick_accuracy as TTNN_free_kick_accuracy, 
             TTNN.long_passing as TTNN_long_passing, TTNN.long_passing as TTNN_long_passing, TTNN.ball_control as TTNN_ball_control, 
             TTNN.acceleration as TTNN_acceleration, TTNN.sprint_speed as TTNN_sprint_speed, TTNN.agility as TTNN_agility, TTNN.reactions as TTNN_reactions, 
-            TTNN.balance as TTNN_balance, TTNN.sTTot_power as TTNN_sTTot_power, TTNN.jumping as TTNN_jumping, TTNN.stamina as TTNN_stamina, 
-            TTNN.strengtTT as TTNN_strengtTT, TTNN.long_sTTots as TTNN_long_sTTots, TTNN.aggression as TTNN_aggression, TTNN.interceptions as TTNN_interceptions, 
+            TTNN.balance as TTNN_balance, TTNN.shot_power as TTNN_shot_power, TTNN.jumping as TTNN_jumping, TTNN.stamina as TTNN_stamina, 
+            TTNN.strength as TTNN_strength, TTNN.long_shots as TTNN_long_shots, TTNN.aggression as TTNN_aggression, TTNN.interceptions as TTNN_interceptions, 
             TTNN.positioning as TTNN_positioning, TTNN.vision as TTNN_vision, TTNN.penalties as TTNN_penalties, TTNN.marking as TTNN_marking, 
             TTNN.standing_tackle as TTNN_standing_tackle, TTNN.gk_diving as TTNN_gk_diving, TTNN.gk_kicking as TTNN_gk_kicking, 
             TTNN.gk_positioning as TTNN_gk_positioning, TTNN.gk_reflexes as TTNN_gk_reflexes,\n`;
@@ -21,24 +23,30 @@ var currentSelectionTemplate = `
 
 
 function generateJoins(type) {
+    var now = new Date();
+    var dateString = `${now.getFullYear()}${now.getMonth()}${now.getDay()}${now.getHours()}${now.getMinutes()}`;
+    var filename = `generated/${dateString}-${type}.sql`
 
     var incrementalSelects = '';
     for (var i = 1; i <= 11; i++) {
         var current = `${type}${i}`;
         var currentSelection = currentSelectionTemplate.replace(/TT/g, type).replace(/NN/g, i);
+        incrementalSelects = incrementalSelects.replace(/h\d+\..+? as /g, 'wella.');
         incrementalSelects = incrementalSelects + currentSelection;
 
-        console.log(`
-        CREATE TABLE WELLA_${1} AS
+        
+        fs.appendFileSync(filename,
+        `\nCREATE TABLE WELLA_${('0'+i).slice(-2)} AS
             SELECT
             ${matchSelection}
-            ${incrementalSelects}
-            FROM WELLA_${i-1} as m
-            INNER JOIN Player_Attributes as ${current} on ${current}.player_api_id = m.home_player_${i} AND ${current}.date < m.date
-            GROUP BY m.match_api_id
-            HAVING ${current}.date = MAX(${current}.date)\n`);
-    }
-    
-    console.log();
-    
+            ${incrementalSelects.substring(0, incrementalSelects.length -2)}
+            
+            FROM WELLA_${('0'+(i-1)).slice(-2)} as wella
+            INNER JOIN Match as match on match.match_api_id = wella.match_api_id
+            INNER JOIN Player as pa on pa.player_api_id = match.home_player_${i}
+            INNER JOIN Player_Attributes as ${current} on ${current}.player_api_id = match.home_player_${i} AND ${current}.date < wella.date
+            GROUP BY wella.match_api_id
+            HAVING ${current}.date = MAX(${current}.date);
+            \n  ------------------------------------------------\n`);
+    }    
 }
