@@ -1,0 +1,27 @@
+{
+  "name": "soccer-match-prediction",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "sqlite3": "^4.0.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init": "node scripts/init.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mferri17/soccer-match-prediction.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mferri17/soccer-match-prediction/issues"
+  },
+  "homepage": "https://github.com/mferri17/soccer-match-prediction#readme"
+}
