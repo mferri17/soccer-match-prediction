@@ -16,26 +16,29 @@ GENERAL
 ATTACK
     attacking_work_rate
     finishing
-    dribbling
     free_kick_accuracy
-    acceleration
+    acceleration *
     heading_accuracy
     curve
     jumping
-    sprint_speed
+    sprint_speed *
     shot_power
     long_shots
     volleys
 
 
 CENTER
+    acceleration *
+    sprint_speed *
+    dribbling
     crossing
-    short_passing
+    short_passing **
     long_passing
     vision
 
 
 DEFENCE
+    short_passing **
     defensive_work_rate
     reactions
     aggression
