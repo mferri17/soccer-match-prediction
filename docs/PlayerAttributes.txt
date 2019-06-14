@@ -1,0 +1,55 @@
+
+
+GENERAL
+    overall_rating
+    potential
+    preferred_foot
+    ball_control
+    agility
+    positioning
+    penalties
+    balance
+    stamina
+    strength
+
+
+ATTACK
+    attacking_work_rate
+    finishing
+    dribbling
+    free_kick_accuracy
+    acceleration
+    heading_accuracy
+    curve
+    jumping
+    sprint_speed
+    shot_power
+    long_shots
+    volleys
+
+
+CENTER
+    crossing
+    short_passing
+    long_passing
+    vision
+
+
+DEFENCE
+    defensive_work_rate
+    reactions
+    aggression
+    standing_tackle
+    sliding_tackle
+    interceptions
+    marking
+
+
+GOALKEEPER
+    gk_diving
+    gk_handling
+    gk_kicking
+    gk_positioning
+    gk_reflexes
+
+
