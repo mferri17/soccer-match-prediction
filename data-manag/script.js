@@ -14,9 +14,14 @@
 //     console.log(pluto);
 // }
 
-var strings = []
+// var strings = []
+// for(var counter = 1; counter <= 11; counter++){
+//     var pluto = `h${counter}.date = MAX(h${counter}.date) AND \n`;
+//     strings.push(pluto);
+//     console.log(pluto);
+// }
+
 for(var counter = 1; counter <= 11; counter++){
-    var pluto = `h${counter}.date = MAX(h${counter}.date) AND \n`;
-    strings.push(pluto);
+    var pluto = `m.home_player_X${counter}, `;
     console.log(pluto);
 }
