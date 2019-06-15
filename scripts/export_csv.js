@@ -9,6 +9,11 @@ const sqlite3 = require('sqlite3').verbose();
   const db = new sqlite3.Database(dbFile);
 
   db.serialize(() => {
+    const matchSelects = `
+      TEMP.match_api_id,
+      TEMP.date,
+    `;
+
     const currentSelectionTemplate = `
             TTNN.player_api_id as TTNN_player_api_id, player.player_name as TTNN_player_name, player.height as TTNN_height, player.weight as TTNN_weight, 
             TTNN.date as TTNN_date, TTNN.overall_rating as TTNN_overall_rating, TTNN.potential as TTNN_potential, TTNN.preferred_foot as TTNN_preferred_foot, 
@@ -40,7 +45,7 @@ const sqlite3 = require('sqlite3').verbose();
 
           incrementalSelects =
             incrementalSelects.replace(
-              new RegExp(`${type}\\d+\\..+?\\s+as\\s+`, 'g'),
+              new RegExp(`(?:${type}\\d+|player)\\..+?\\s+as\\s+`, 'g'),
               'TEMP.'
             ) + currentSelection;
 
@@ -50,8 +55,7 @@ const sqlite3 = require('sqlite3').verbose();
           queries.push(`
               CREATE TABLE ${currentTable} AS
               SELECT
-              TEMP.match_api_id,
-              TEMP.date,
+              ${matchSelects}
               ${incrementalSelects.substring(
                 0,
                 incrementalSelects.length - 2
@@ -67,12 +71,65 @@ const sqlite3 = require('sqlite3').verbose();
 
           queries.push(`DROP TABLE ${sourceTableName};`);
         });
-
+        
+        // teams
         incrementalSelects =
-            incrementalSelects.replace(
-              new RegExp(`${type}\\d+\\..+?\\s+as\\s+`, 'g'),
-              'TEMP.'
-            );
+          incrementalSelects.replace(
+            new RegExp(`(?:${type}\\d+|player)\\..+?\\s+as\\s+`, 'g'),
+            'TEMP.'
+          ) + (`
+            team.team_long_name as ${type}_tema_long_name,
+            team.team_short_name as ${type}team_short_name,
+            ta.date as ${type}_team_date,
+            ta.buildUpPlaySpeed as ${type}_team_buildUpPlaySpeed,
+            ta.buildUpPlaySpeedClass as ${type}_team_buildUpPlaySpeedClass,
+            ta.buildUpPlayDribbling as ${type}_team_buildUpPlayDribbling,
+            ta.buildUpPlayDribblingClass as ${type}_team_buildUpPlayDribblingClass,
+            ta.buildUpPlayPassing as ${type}_team_buildUpPlayPassing,
+            ta.buildUpPlayPassingClass as ${type}_team_buildUpPlayPassingClass,
+            ta.buildUpPlayPositioningClass as ${type}_team_buildUpPlayPositioningClass,
+            ta.chanceCreationPassing as ${type}_team_chanceCreationPassing,
+            ta.chanceCreationPassingClass as ${type}_team_chanceCreationPassingClass,
+            ta.chanceCreationCrossing as ${type}_team_chanceCreationCrossing,
+            ta.chanceCreationCrossingClass as ${type}_team_chanceCreationCrossingClass,
+            ta.chanceCreationShooting as ${type}_team_chanceCreationShooting,
+            ta.chanceCreationShootingClass as ${type}_team_chanceCreationShootingClass,
+            ta.chanceCreationPositioningClass as ${type}_team_chanceCreationPositioningClass,
+            ta.defencePressure as ${type}_team_defencePressure,
+            ta.defencePressureClass as ${type}_team_defencePressureClass,
+            ta.defenceAggression as ${type}_team_defenceAggression,
+            ta.defenceAggressionClass as ${type}_team_defenceAggressionClass,
+            ta.defenceTeamWidth as ${type}_team_defenceTeamWidth,
+            ta.defenceTeamWidthClass as ${type}_team_defenceTeamWidthClass,
+            ta.defenceDefenderLineClass as ${type}_team_defenceDefenderLineClass,\n`);
+
+        const sourceTableName = currentTable;
+        currentTable = `TEMP_${type}`;
+
+        queries.push(`
+            CREATE TABLE ${currentTable} AS
+            SELECT
+            ${matchSelects}
+            ${incrementalSelects.substring(
+              0,
+              incrementalSelects.length - 2
+            )}
+            
+            FROM ${sourceTableName} as TEMP
+            INNER JOIN Match as match on match.match_api_id = TEMP.match_api_id
+            INNER JOIN Team as team on team.team_api_id = match.${type}_team_api_id
+            INNER JOIN Team_Attributes as ta on ta.team_api_id = match.${type}_team_api_id AND ta.date < TEMP.date
+            GROUP BY TEMP.match_api_id
+            HAVING ta.date = MAX(ta.date);
+        `);
+
+        queries.push(`DROP TABLE ${sourceTableName};`);
+              
+        incrementalSelects =
+          incrementalSelects.replace(
+            /(?:ta|team)\..+?\s+as\s+/g,
+            'TEMP.'
+          );
     });
 
     queries.forEach((query, i) => {
