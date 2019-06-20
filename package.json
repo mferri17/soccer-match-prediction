@@ -13,7 +13,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "init": "node scripts/init.js",
-    "export:csv": "node scripts/export_csv.js"
+    "join:all": "node scripts/join_all.js"
   },
   "repository": {
     "type": "git",
