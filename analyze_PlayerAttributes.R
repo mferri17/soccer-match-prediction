@@ -10,6 +10,7 @@ library("arules");
 library("plyr");
 library("GGally");
 library(ggplot2);
+library("arules");
 
 
 #setwd("C:/Users/mbass/dev/modelli-progetto");
@@ -93,3 +94,18 @@ plot_correlation(
 #     "use" = "pairwise.complete.obs"
 #     #"y" = PlayerAttributes[which(PlayerAttributes$sliding_tackle < 30 & PlayerAttributes$gk_diving < 50), "overall_rating"]
 #   ));
+
+
+
+
+#### PLAYER ATTRIBUTES DISCRETIZATION
+
+plot_histogram(PlayerAttributes$overall_rating);
+
+discretize(PlayerAttributes$overall_rating, 
+           method = "frequency", 
+           breaks = 5);
+
+
+
+
