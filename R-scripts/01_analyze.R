@@ -104,7 +104,7 @@ plot_histogram(PlayerAttributes$overall_rating);
 
 discretize(PlayerAttributes$overall_rating, 
            method = "frequency", 
-           breaks = 5);
+           breaks = 4);
 
 
 

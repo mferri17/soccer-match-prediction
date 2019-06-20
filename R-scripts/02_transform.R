@@ -169,7 +169,7 @@ plot_histogram(discretized);
 
 # saving CSV
 
-write.csv(discretized, file = "dataset.csv",row.names=FALSE);
+write.csv(discretized, file = "dataset/dataset.csv",row.names=FALSE);
 
 
 
