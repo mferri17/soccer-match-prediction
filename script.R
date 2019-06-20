@@ -7,7 +7,6 @@
 
 library("RSQLite");
 library("DataExplorer");
-library("DataExplorer");
 library("arules");
 library("plyr");
 library("GGally");

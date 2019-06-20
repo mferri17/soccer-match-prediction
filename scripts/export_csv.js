@@ -10,8 +10,8 @@ const sqlite3 = require('sqlite3').verbose();
 
   db.serialize(() => {
     const matchSelects = `
-      TEMP.match_api_id,
-      TEMP.date,
+        TEMP.match_api_id,
+        TEMP.date,
     `;
 
     const currentSelectionTemplate = `
@@ -50,7 +50,7 @@ const sqlite3 = require('sqlite3').verbose();
             ) + currentSelection;
 
           const sourceTableName = currentTable;
-          currentTable = `TEMP_${i + j}`;
+          currentTable = `TEMP_${i + (11*j)}`;
 
           queries.push(`
               CREATE TABLE ${currentTable} AS
@@ -63,8 +63,8 @@ const sqlite3 = require('sqlite3').verbose();
               
               FROM ${sourceTableName} as TEMP
               INNER JOIN Match as match on match.match_api_id = TEMP.match_api_id
-              INNER JOIN Player as player on player.player_api_id = match.home_player_${i}
-              INNER JOIN Player_Attributes as ${current} on ${current}.player_api_id = match.home_player_${i} AND ${current}.date < TEMP.date
+              INNER JOIN Player as player on player.player_api_id = match.${type}_player_${i}
+              INNER JOIN Player_Attributes as ${current} on ${current}.player_api_id = match.${type}_player_${i} AND ${current}.date < TEMP.date
               GROUP BY TEMP.match_api_id
               HAVING ${current}.date = MAX(${current}.date);
           `);
@@ -131,6 +131,14 @@ const sqlite3 = require('sqlite3').verbose();
             'TEMP.'
           );
     });
+
+
+    queries.push(`CREATE TABLE FINAL AS 
+      SELECT * FROM ${currentTable} as TEMP
+      INNER JOIN Match as match on match.match_api_id = TEMP.match_api_id;`);
+    
+    queries.push(`DROP TABLE ${currentTable};`);
+
 
     queries.forEach((query, i) => {
       db.run(query, async (err) => {
