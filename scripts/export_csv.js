@@ -20,7 +20,7 @@ const sqlite3 = require('sqlite3').verbose();
             TTNN.attacking_work_rate as TTNN_attacking_work_rate, TTNN.defensive_work_rate as TTNN_defensive_work_rate, TTNN.crossing as TTNN_crossing, 
             TTNN.finishing as TTNN_finishing, TTNN.heading_accuracy as TTNN_heading_accuracy, TTNN.short_passing as TTNN_short_passing, 
             TTNN.volleys as TTNN_volleys, TTNN.dribbling as TTNN_dribbling, TTNN.curve as TTNN_curve, TTNN.free_kick_accuracy as TTNN_free_kick_accuracy, 
-            TTNN.long_passing as TTNN_long_passing, TTNN.long_passing as TTNN_long_passing, TTNN.ball_control as TTNN_ball_control, 
+            TTNN.long_passing as TTNN_long_passing, TTNN.ball_control as TTNN_ball_control, 
             TTNN.acceleration as TTNN_acceleration, TTNN.sprint_speed as TTNN_sprint_speed, TTNN.agility as TTNN_agility, TTNN.reactions as TTNN_reactions, 
             TTNN.balance as TTNN_balance, TTNN.shot_power as TTNN_shot_power, TTNN.jumping as TTNN_jumping, TTNN.stamina as TTNN_stamina, 
             TTNN.strength as TTNN_strength, TTNN.long_shots as TTNN_long_shots, TTNN.aggression as TTNN_aggression, TTNN.interceptions as TTNN_interceptions, 
