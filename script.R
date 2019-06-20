@@ -7,56 +7,82 @@
 
 library("RSQLite");
 library("DataExplorer");
+library("DataExplorer");
 library("arules");
 library("plyr");
 library("GGally");
 
-setwd("C:/Users/mbass/dev/modelli-progetto");
-con <- dbConnect(drv=RSQLite::SQLite(), dbname="dataset/database.sqlite");
+setwd("C:/Users/mbass/dev/soccer-match-prediction");
+data = read.csv("dataset/FINAL.csv", header = TRUE);
 
-tables <- dbListTables(con);
-
-lDataFrames <- vector("list", length=length(tables));
-for (i in seq(along=tables)) {
-  lDataFrames[[i]] <- dbGetQuery(conn=con, statement=paste("SELECT * FROM '", tables[[i]], "'", sep=""));
+# remove rows with NA inside
+rows = !(is.na(data$home_team_goal)) & !(is.na(data$home_team_goal));
+for (type in c("home", "away")) {
+  for (i in 1:11) {
+    rows = rows & !(is.na(data[[sprintf("%s%d_overall_rating", type, i)]])) & !(is.na(data[[sprintf("%s_player_Y%d", type, i)]]));
+  }
 }
 
-dbDisconnect(con);
+data = data[rows, ];
 
-# missing values analysis
-print(introduce(lDataFrames[[5]]));
-plot_missing(lDataFrames[[5]]);
-plot_intro(lDataFrames[[5]]);
+mapRow = function(x) {
+  home_goals = as.numeric(x["home_team_goal"]);
+  away_goals = as.numeric(x["away_team_goal"]);
+  
+  if (home_goals > away_goals) {
+    winner = "home";
+  } else if (home_goals < away_goals) {
+    winner = "away";
+  } else {
+    winner = "draw";
+  }
+  
+  result = list();
+  result["winner"] = winner;
+  
+  for (type in c("home", "away")) {
+    gk_key = sprintf("%s_gk", type);
+    def_key = sprintf("%s_def", type);
+    mid_key = sprintf("%s_mid", type);
+    atk_key = sprintf("%s_atk", type);
+    
+    for (key in c(gk_key, def_key, mid_key, atk_key)) {
+      result[key] = 0;
+    }
+    
+    for (i in 1:11) {
+      overall = as.numeric(x[sprintf("%s%d_overall_rating", type, i)]);
+      position = as.numeric(x[sprintf("%s_player_Y%d", type, i)]);
+      
+      if (position == 1) {
+        key = gk_key;
+      } else if (position < 5) {
+        key = def_key;
+      } else if (position < 9) {
+        key = mid_key;
+      } else {
+        key = atk_key;
+      }
+      
+      result[key] = as.numeric(result[key]) + overall;
+    }
+  }
 
-lDataFrames[[3]]$home_player_X1 = factor(lDataFrames[[3]]$home_player_X1);
-lDataFrames[[3]]$home_player_Y1 = factor(lDataFrames[[3]]$home_player_Y1);
-lDataFrames[[3]]$home_player_X2 = factor(lDataFrames[[3]]$home_player_X2);
-lDataFrames[[3]]$home_player_Y2 = factor(lDataFrames[[3]]$home_player_Y2);
-lDataFrames[[3]]$home_player_X3 = factor(lDataFrames[[3]]$home_player_X3);
-lDataFrames[[3]]$home_player_Y3 = factor(lDataFrames[[3]]$home_player_Y3);
-lDataFrames[[3]]$home_player_X4 = factor(lDataFrames[[3]]$home_player_X4);
-lDataFrames[[3]]$home_player_Y4 = factor(lDataFrames[[3]]$home_player_Y4);
-lDataFrames[[3]]$home_player_X5 = factor(lDataFrames[[3]]$home_player_X5);
-lDataFrames[[3]]$home_player_Y5 = factor(lDataFrames[[3]]$home_player_Y5);
-lDataFrames[[3]]$home_player_X6 = factor(lDataFrames[[3]]$home_player_X6);
-lDataFrames[[3]]$home_player_Y6 = factor(lDataFrames[[3]]$home_player_Y6);
-lDataFrames[[3]]$home_player_X7 = factor(lDataFrames[[3]]$home_player_X7);
-lDataFrames[[3]]$home_player_Y7 = factor(lDataFrames[[3]]$home_player_Y7);
-lDataFrames[[3]]$home_player_X8 = factor(lDataFrames[[3]]$home_player_X8);
-lDataFrames[[3]]$home_player_Y8 = factor(lDataFrames[[3]]$home_player_Y8);
-lDataFrames[[3]]$home_player_X9 = factor(lDataFrames[[3]]$home_player_X9);
-lDataFrames[[3]]$home_player_Y9 = factor(lDataFrames[[3]]$home_player_Y9);
-lDataFrames[[3]]$home_player_X10 = factor(lDataFrames[[3]]$home_player_X10);
-lDataFrames[[3]]$home_player_Y10 = factor(lDataFrames[[3]]$home_player_Y10);
-lDataFrames[[3]]$home_player_X11 = factor(lDataFrames[[3]]$home_player_X11);
-lDataFrames[[3]]$home_player_Y11 = factor(lDataFrames[[3]]$home_player_Y11);
-plot_bar(lDataFrames[[3]]);
+  result;
+};
 
-#plot_histogram(lDataFrames[[5]]);
-#ggcorr(lDataFrames[[5]]);
+lists = apply(data, 1, mapRow);
+newData = data.frame(matrix(unlist(lists), nrow=length(lists), byrow=T),stringsAsFactors=FALSE);
+colnames(newData) = names(lists[[1]]);
 
-#discretized = discretize(lDataFrames[[5]]$overall_rating, method = "frequency", breaks = 6);
-#discretized = revalue(discretized, c("[33,62)"="[0,62)", "[75,94]"="[75,100]"));
-
-#print(levels(discretized));
-
+newData$winner = factor(newData$winner);
+for (type in c("home", "away")) {
+  gk_key = sprintf("%s_gk", type);
+  def_key = sprintf("%s_def", type);
+  mid_key = sprintf("%s_mid", type);
+  atk_key = sprintf("%s_atk", type);
+  
+  for (key in c(gk_key, def_key, mid_key, atk_key)) {
+    newData[[key]] = as.numeric(newData[[key]]);
+  }
+}
