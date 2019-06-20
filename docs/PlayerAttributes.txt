@@ -7,7 +7,6 @@ GENERAL
     ball_control
     agility
     positioning
-    penalties
     balance
     stamina
     strength
@@ -25,6 +24,7 @@ ATTACK
     shot_power
     long_shots
     volleys
+    penalties
 
 
 CENTER
@@ -35,6 +35,7 @@ CENTER
     short_passing **
     long_passing
     vision
+    penalties
 
 
 DEFENCE

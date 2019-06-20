@@ -1,5 +1,5 @@
 
-Il giocatore  1 è il PORTIERE
-Dal giocatore 2 al 5 DIFENSORI
-Dal giocatore 6 al 8 CENTROCAMPO
-Dal giocatore 9 al 11 ATTACCANTI
+La posizione     1          PORTIERE
+Dalla posizione  2 alla  4  DIFENSORI
+Dalla posizione  5 alla  8  CENTROCAMPO
+Dalla posizione  9 alla 11  ATTACCANTI
