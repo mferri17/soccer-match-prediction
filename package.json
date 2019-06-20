@@ -12,8 +12,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init": "node scripts/init.js",
-    "join:all": "node scripts/join_all.js"
+    "init": "node data-manag/sql-init.js",
+    "join:all": "node data-manag/sql-join-all.js"
   },
   "repository": {
     "type": "git",
