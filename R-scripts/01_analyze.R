@@ -13,8 +13,8 @@ library(ggplot2);
 library("arules");
 
 
-#setwd("C:/Users/mbass/dev/modelli-progetto");
-setwd("C:/Users/96mar/Desktop/Modelli Probabilistici");
+#setwd("C:/Users/mbass/dev/modelli-progetto/R-scripts");
+setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
 
 
@@ -23,7 +23,7 @@ setwd("C:/Users/96mar/Desktop/Modelli Probabilistici");
 #### PLAYER ATTRIBUTES ANALYSIS
 
 
-PlayerAttributes <- read.csv(file="dataset/Player_Attributes.csv", header=TRUE, sep=",");
+PlayerAttributes <- read.csv(file="../dataset/Player_Attributes.csv", header=TRUE, sep=",");
 PlayerAttributes$id <- NULL;
 PlayerAttributes$player_api_id <- NULL;
 PlayerAttributes$player_fifa_api_id <- NULL;

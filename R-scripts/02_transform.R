@@ -12,9 +12,9 @@ library("arules");
 library("plyr");
 library("GGally");
 
-#setwd("C:/Users/mbass/dev/soccer-match-prediction");
-setwd("C:/Users/96mar/Desktop/Modelli Probabilistici");
-data = read.csv("dataset/FINAL.csv", header = TRUE);
+#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+data = read.csv("../dataset/FINAL.csv", header = TRUE);
 
 # remove rows with NA inside
 rows = !(is.na(data$home_team_goal)) & !(is.na(data$away_team_goal));
@@ -169,7 +169,7 @@ plot_histogram(discretized);
 
 # saving CSV
 
-write.csv(discretized, file = "dataset/dataset.csv",row.names=FALSE);
+write.csv(discretized, file = "dataset.csv",row.names=FALSE);
 
 
 
