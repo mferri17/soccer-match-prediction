@@ -45,8 +45,11 @@ mapRow = function(x) {
     def_key = sprintf("%s_def", type);
     mid_key = sprintf("%s_mid", type);
     atk_key = sprintf("%s_atk", type);
+
+    keys = c(gk_key, def_key, mid_key, atk_key);
+    count = c(0, 0, 0, 0);
     
-    for (key in c(gk_key, def_key, mid_key, atk_key)) {
+    for (key in keys) {
       result[key] = 0;
     }
     
@@ -55,17 +58,28 @@ mapRow = function(x) {
       position = as.numeric(x[sprintf("%s_player_Y%d", type, i)]);
       
       if (position == 1) {
+        count[1] = count[1] + 1;
         key = gk_key;
       } else if (position < 5) {
+        count[2] = count[2] + 1;
         key = def_key;
       } else if (position < 9) {
+        count[3] = count[3] + 1;
         key = mid_key;
       } else {
+        count[4] = count[4] + 1;
         key = atk_key;
       }
       
       result[key] = as.numeric(result[key]) + overall;
     }
+    
+    i = 0;
+    for (key in keys) {
+      i = i + 1;
+      result[key] = round(as.numeric(result[key]) / count[i]);
+    }
+    
   }
 
   result;
