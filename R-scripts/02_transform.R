@@ -5,14 +5,11 @@
 #install.packages("plyr");
 #install.packages("GGally");
 
-library("RSQLite");
 library("DataExplorer");
 library("arules");
-library("plyr");
-library("GGally");
 
-#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+#setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 data = read.csv("../dataset/FINAL.csv", header = TRUE);
 
 # remove rows with NA inside
@@ -131,7 +128,7 @@ for (type in c("home", "away")) {
 # update overall-rating given players per role count
 for (type in c("home", "away")) {
   for (role in c("def", "mid", "atk")) {
-    normalized[sprintf("%s_%s", type, role)] = round(apply(newData, 1, function(x) 
+    newData[sprintf("%s_%s", type, role)] = round(apply(newData, 1, function(x) 
       as.numeric(x[sprintf("%s_%s", type, role)]) + 
         log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(newData[[sprintf("%s_%s_count", type, role)]]))*20));
     # mean should be taken out of this cicle
@@ -141,14 +138,14 @@ for (type in c("home", "away")) {
 
 
 # discretizaion intervals analysis (chosen empirically)
-discretize(newData$home_gk, method = "frequency", breaks = 4);
-discretize(newData$home_def, method = "frequency", breaks = 4);
-discretize(newData$home_mid, method = "frequency", breaks = 4);
-discretize(newData$home_atk, method = "frequency", breaks = 4);
-discretize(newData$away_gk, method = "frequency", breaks = 4);
-discretize(newData$away_def, method = "frequency", breaks = 4);
-discretize(newData$away_mid, method = "frequency", breaks = 4);
-discretize(newData$away_atk, method = "frequency", breaks = 4);
+#discretize(newData$home_gk, method = "frequency", breaks = 4);
+#discretize(newData$home_def, method = "frequency", breaks = 4);
+#discretize(newData$home_mid, method = "frequency", breaks = 4);
+#discretize(newData$home_atk, method = "frequency", breaks = 4);
+#discretize(newData$away_gk, method = "frequency", breaks = 4);
+#discretize(newData$away_def, method = "frequency", breaks = 4);
+#discretize(newData$away_mid, method = "frequency", breaks = 4);
+#discretize(newData$away_atk, method = "frequency", breaks = 4);
 
 
 ### features discretization
