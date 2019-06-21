@@ -10,17 +10,17 @@ library("arules");
 
 #setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
-data = read.csv("../dataset/FINAL.csv", header = TRUE);
+dataset = read.csv("../datasetset/FINAL.csv", header = TRUE);
 
 # remove rows with NA inside
-rows = !(is.na(data$home_team_goal)) & !(is.na(data$away_team_goal));
+rows = !(is.na(dataset$home_team_goal)) & !(is.na(dataset$away_team_goal));
 for (type in c("home", "away")) {
   for (i in 1:11) {
-    rows = rows & !(is.na(data[[sprintf("%s%d_overall_rating", type, i)]])) & !(is.na(data[[sprintf("%s_player_Y%d", type, i)]]));
+    rows = rows & !(is.na(dataset[[sprintf("%s%d_overall_rating", type, i)]])) & !(is.na(dataset[[sprintf("%s_player_Y%d", type, i)]]));
   }
 }
 
-data = data[rows, ];
+dataset = dataset[rows, ];
 
 
 # given a row, this function computes a role-based aggregation for overall_rating
@@ -97,9 +97,9 @@ mapRow = function(x) {
 
 
 
-# data frame transformation
-lists = apply(data, 1, mapRow);
-newData = data.frame(matrix(unlist(lists), nrow=length(lists), byrow=T),stringsAsFactors=FALSE);
+# dataset frame transformation
+lists = apply(dataset, 1, mapRow);
+newData = dataset.frame(matrix(unlist(lists), nrow=length(lists), byrow=T),stringsAsFactors=FALSE);
 colnames(newData) = names(lists[[1]]);
 
 
@@ -155,7 +155,7 @@ newData$away_atk_score <- with(newData, away_atk + away_mid);
 ### features discretization
 
 
-discr = data.frame(newData);
+discr = dataset.frame(newData);
 
 for (type in c("home", "away")) {
   gk_key = sprintf("%s_gk", type);
@@ -174,11 +174,12 @@ for (type in c("home", "away")) {
   
   for (role in c("atk", "def")) {
     key = sprintf("%s_%s_score", type, role);
-    print(key);
     discr[[key]] = 
       discretize(discr[[key]], 
                  method = "frequency", 
-                 breaks = 6);
+                 breaks = 6#,
+                 #labels = c("1", "2", "3", "4", "5", "6")
+                 );
   }
 }
 
@@ -188,7 +189,7 @@ plot_histogram(discr);
 
 # saving CSV
 
-write.csv(discr, file = "dataset.csv",row.names=FALSE);
+write.csv(discr, file = "datasetset.csv",row.names=FALSE);
 
 
 
