@@ -128,26 +128,15 @@ for (type in c("home", "away")) {
 }
 
 
-mean(newData[[sprintf("%s_%s", "home", "atk")]]);
-
-normalized = data.frame(newData);
+# update overall-rating given players per role count
 for (type in c("home", "away")) {
   for (role in c("def", "mid", "atk")) {
-    normalized[sprintf("%s_%s", type, role)] = round(apply(normalized, 1, function(x) 
+    normalized[sprintf("%s_%s", type, role)] = round(apply(newData, 1, function(x) 
       as.numeric(x[sprintf("%s_%s", type, role)]) + 
-        log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(normalized[[sprintf("%s_%s_count", type, role)]]))*20));
+        log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(newData[[sprintf("%s_%s_count", type, role)]]))*20));
     # mean should be taken out of this cicle
   }
 }
-
-mean(normalized[[sprintf("%s_%s", "home", "atk")]]);
-
-plot_histogram(newData$away_atk);
-plot_histogram(normalized$away_atk);
-plot_histogram(newData$away_def);
-plot_histogram(normalized$away_def);
-plot_histogram(newData$away_mid);
-plot_histogram(normalized$away_mid);
 
 
 
@@ -175,9 +164,10 @@ for (type in c("home", "away")) {
   
   for (key in c(gk_key, def_key, mid_key, atk_key)) {
     discretized[[key]] = discretize(discretized[[key]], 
-                                   method = "fixed", 
-                                   breaks = c(-Inf, 68, 73, 76, Inf),
-                                   labels = c("very bad", "bad", "good", "very good"));
+                                   method = "frequency", 
+                                   breaks = 4 #c(-Inf, 68, 73, 76, Inf),
+                                   #labels = c("very bad", "bad", "good", "very good")
+                                   );
   }
 }
 
