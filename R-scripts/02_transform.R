@@ -7,7 +7,6 @@
 
 library("RSQLite");
 library("DataExplorer");
-library("DataExplorer");
 library("arules");
 library("plyr");
 library("GGally");
@@ -83,7 +82,7 @@ mapRow = function(x) {
       result[key] = as.numeric(result[key]) + overall; # overall-ratings sum
     }
     
-    # computing average values
+    # computing average overall-rating for roles
     i = 0;
     for (key in keys) {
       i = i + 1;
@@ -100,11 +99,11 @@ mapRow = function(x) {
 };
 
 
+
 # data frame transformation
 lists = apply(data, 1, mapRow);
 newData = data.frame(matrix(unlist(lists), nrow=length(lists), byrow=T),stringsAsFactors=FALSE);
 colnames(newData) = names(lists[[1]]);
-
 
 
 # type casting
@@ -129,8 +128,26 @@ for (type in c("home", "away")) {
 }
 
 
-plot_histogram(newData);
-plot_bar(newData);
+mean(newData[[sprintf("%s_%s", "home", "atk")]]);
+
+normalized = data.frame(newData);
+for (type in c("home", "away")) {
+  for (role in c("def", "mid", "atk")) {
+    normalized[sprintf("%s_%s", type, role)] = round(apply(normalized, 1, function(x) 
+      as.numeric(x[sprintf("%s_%s", type, role)]) + 
+        log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(normalized[[sprintf("%s_%s_count", type, role)]]))*20));
+    # mean should be taken out of this cicle
+  }
+}
+
+mean(normalized[[sprintf("%s_%s", "home", "atk")]]);
+
+plot_histogram(newData$away_atk);
+plot_histogram(normalized$away_atk);
+plot_histogram(newData$away_def);
+plot_histogram(normalized$away_def);
+plot_histogram(newData$away_mid);
+plot_histogram(normalized$away_mid);
 
 
 
@@ -146,6 +163,7 @@ discretize(newData$away_atk, method = "frequency", breaks = 4);
 
 
 ### features discretization
+
 
 discretized = data.frame(newData);
 
