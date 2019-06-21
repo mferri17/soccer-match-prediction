@@ -8,8 +8,8 @@
 library("DataExplorer");
 library("arules");
 
-setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-#setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 data = read.csv("../dataset/FINAL.csv", header = TRUE);
 
 # remove rows with NA inside
@@ -131,10 +131,14 @@ for (type in c("home", "away")) {
     newData[sprintf("%s_%s", type, role)] = round(apply(newData, 1, function(x) 
       as.numeric(x[sprintf("%s_%s", type, role)]) + 
         log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(newData[[sprintf("%s_%s_count", type, role)]]))*20));
-    # mean should be taken out of this cicle
+    # mean should be taken out of this loop
   }
 }
 
+newData$home_def_score <- with(newData, home_gk + home_def + home_mid);
+newData$home_atk_score <- with(newData, home_atk + home_mid);
+newData$away_def_score <- with(newData, away_gk + away_def + away_mid);
+newData$away_atk_score <- with(newData, away_atk + away_mid);
 
 
 # discretizaion intervals analysis (chosen empirically)
@@ -151,7 +155,7 @@ for (type in c("home", "away")) {
 ### features discretization
 
 
-discretized = data.frame(newData);
+discr = data.frame(newData);
 
 for (type in c("home", "away")) {
   gk_key = sprintf("%s_gk", type);
@@ -160,21 +164,31 @@ for (type in c("home", "away")) {
   atk_key = sprintf("%s_atk", type);
   
   for (key in c(gk_key, def_key, mid_key, atk_key)) {
-    discretized[[key]] = discretize(discretized[[key]], 
+    discr[[key]] = discretize(discr[[key]], 
                                    method = "frequency", 
-                                   breaks = 4 #c(-Inf, 68, 73, 76, Inf),
-                                   #labels = c("very bad", "bad", "good", "very good")
+                                   breaks = 4, #c(-Inf, 68, 73, 76, Inf),
+                                   labels = c("very bad", "bad", "good", "very good")
                                    );
+  }
+  
+  
+  for (role in c("atk", "def")) {
+    key = sprintf("%s_%s_score", type, role);
+    print(key);
+    discr[[key]] = 
+      discretize(discr[[key]], 
+                 method = "frequency", 
+                 breaks = 6);
   }
 }
 
-plot_bar(discretized);
-plot_histogram(discretized);
+plot_bar(discr);
+plot_histogram(discr);
 
 
 # saving CSV
 
-write.csv(discretized, file = "dataset.csv",row.names=FALSE);
+write.csv(discr, file = "dataset.csv",row.names=FALSE);
 
 
 
