@@ -1,10 +1,12 @@
 const path = require('path');
+const fs = require('fs');
 const { exec } = require('child_process');
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 
-const rScriptPath = path.relative(__dirname, path.join(__dirname, '..', 'predict.R'));
+const rScriptPath = path.relative(__dirname, path.join(__dirname, '..', 'R-scripts', 'ui_predict.R'));
+const jsonPath = path.relative(__dirname, path.join(__dirname, '..', 'R-scripts', 'tempData.json'));
 
 const dbDir = path.join(__dirname, '..', 'dataset');
 const dbFile = path.join(dbDir, 'database.sqlite');
@@ -16,7 +18,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-app.use(function(_, res, next) {
+app.use((_, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
@@ -55,8 +57,6 @@ app.get('/players', (_, res) => {
 });
 
 app.post('/predict', (req, res) => {
-  console.log(req.body);
-
   const datasetRow = req.body.reduce((acc, team, i) => {
     const teamName = i === 0 ? 'home' : 'away';
 
@@ -75,7 +75,7 @@ app.post('/predict', (req, res) => {
     away_team_goal: 0
   });
 
-  console.log(datasetRow);
+  fs.writeFileSync(jsonPath, JSON.stringify(datasetRow));
 
   exec(`Rscript ${rScriptPath}`, (err, stdout /* , stderr */) => {
     if (err) {
