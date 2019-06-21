@@ -43,8 +43,6 @@ res = cpquery(
 
 resk = bn.cv(method = "k-fold", data = data, bn = dag, loss = "pred", loss.args = list(target = "winner"));
 
-plot(resk);
-
 # Prediction
 pred = predict(fitted, "winner", data, prob=TRUE);
 predicted_class = pred;
