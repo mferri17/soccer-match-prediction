@@ -7,45 +7,23 @@ const getURL = url => `${BASE_URL}${url}`;
 const config = {
   initialState: {
     results: null,
-    availableTeams: [],
     availablePlayers: [],
     configs: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]'),
     teams: [{
-      teamInfo: {},
       players: []
     }, {
-      teamInfo: {},
       players: []
     }]
   },
   actionsCreators: {
     init: async (state) => {
-      const [teamsResponse, playersResponse] = await Promise.all([
-        fetch(getURL('teams')),
-        fetch(getURL('players'))
-      ]);
+      const playersResponse = await fetch(getURL('players'))
 
       return {
         ...state,
-        availableTeams: await teamsResponse.json(),
         availablePlayers: await playersResponse.json()
       };
     },
-    changeTeam: (state, _, teamToUpdate, teamId) => ({
-      ...state,
-      teams: state.teams.map(team => {
-        if (team === teamToUpdate) {
-          return {
-            ...teamToUpdate,
-            teamInfo: {
-              ...state.availableTeams.find(team => team.id === teamId)
-            }
-          };
-        }
-
-        return team;
-      })
-    }),
     addPlayer: (state, _, {
       player,
       team: teamToUpdate
@@ -107,7 +85,14 @@ const config = {
       })
     }),
     computeResults: async state => {
-      const response = await fetch(getURL('predict'));
+      const response = await fetch(getURL('predict'), {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(state.teams)
+      });
       const results = await response.json();
 
       return {

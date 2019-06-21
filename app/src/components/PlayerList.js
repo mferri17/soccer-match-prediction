@@ -76,8 +76,7 @@ const PlayerList = ({ team }) => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={player.player_name}
-                  // weight is in libs
-                  secondary={`${player.height} cm - ${Math.round(player.weight * 0.45359 * 100) / 100} kg`}
+                  secondary={`Rating: ${player.overall_rating}`}
                 />
                 <ListItemSecondaryAction>
                   <IconButton

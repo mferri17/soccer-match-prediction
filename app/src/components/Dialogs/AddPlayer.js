@@ -22,8 +22,7 @@ const AddPlayerDialog = React.memo(({ open, onClose, team, availablePlayers }) =
     const {
       id,
       player_name,
-      height,
-      weight
+      overall_rating
     } = player;
   
     return (
@@ -42,8 +41,7 @@ const AddPlayerDialog = React.memo(({ open, onClose, team, availablePlayers }) =
         </ListItemAvatar>
         <ListItemText
           primary={player_name}
-          // weight is in libs
-          secondary={`${height} cm - ${Math.round(weight * 0.45359 * 100) / 100} kg`}
+          secondary={`Rating: ${overall_rating}`}
         />
       </ListItem>
     );

@@ -1,10 +1,7 @@
 export const range = n => [...new Array(n).keys()];
 
-export const getTeamName = teamInfo => `${teamInfo.team_long_name} (${teamInfo.team_short_name})`;
-
 const isValidTeam = team =>
   team &&
-  team.teamInfo && team.teamInfo.id &&
   team.players.length === 11 &&
   team.players.filter(player => player.x === 1 && player.y === 1).length === 1; // exactly one goalkeeper
 

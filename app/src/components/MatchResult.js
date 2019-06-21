@@ -3,7 +3,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import { connect, actions } from '../store';
-import { getTeamName } from '../utils';
 
 const useStyles = makeStyles({
   root: {
@@ -58,7 +57,7 @@ const MatchResult = ({ teams: [homeTeam, awayTeam], results }) => {
                   className={classes.teamName}
                   style={getColor(results[0])}
                 >
-                  {getTeamName(homeTeam.teamInfo)}
+                  Home team
                 </Typography>
                 <Typography className={classes.vsLabel}>
                   vs
@@ -67,7 +66,7 @@ const MatchResult = ({ teams: [homeTeam, awayTeam], results }) => {
                   className={classes.teamName}
                   style={getColor(results[1])}
                 >
-                  {getTeamName(awayTeam.teamInfo)}
+                  Away team
                 </Typography>
                 <Typography className={classes.probabilityText}>
                   Prediction assigned exactly {'<'}{results[0]}, {results[1]}{'>'} probabilities.
