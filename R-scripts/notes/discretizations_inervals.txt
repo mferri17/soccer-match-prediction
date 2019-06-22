@@ -1,8 +1,0 @@
-Discretization intervals for  home_gk :  48 66 71 74 77 80 90
-Discretization intervals for  home_def :  52 65 69 72 74 76 86
-Discretization intervals for  home_mid :  52 66 70 72 74 77 88
-Discretization intervals for  home_atk :  48 67 70 73 76 79 91
-Discretization intervals for  away_gk :  49 66 71 74 77 80 90
-Discretization intervals for  away_def :  52 65 69 72 74 76 86
-Discretization intervals for  away_mid :  51 66 70 72 74 77 89
-Discretization intervals for  away_atk :  46 67 70 73 76 79 92
