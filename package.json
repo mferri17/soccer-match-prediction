@@ -7,6 +7,7 @@
     "doc": "docs"
   },
   "dependencies": {
+    "react-force-graph": "^1.23.1",
     "sqlite3": "^4.0.9"
   },
   "devDependencies": {},

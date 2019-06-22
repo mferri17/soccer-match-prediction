@@ -6,6 +6,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 
 const rScriptPath = path.relative(__dirname, path.join(__dirname, '..', 'R-scripts', 'ui_predict.R'));
+const rInferencePath = path.relative(__dirname, path.join(__dirname, '..', 'R-scripts', 'ui_inference.R'));
 const jsonPath = path.relative(__dirname, path.join(__dirname, '..', 'R-scripts', 'tempData.json'));
 
 const dbDir = path.join(__dirname, '..', 'dataset');
@@ -85,6 +86,28 @@ app.post('/predict', (req, res) => {
       res.json([perc, Math.round((1 - perc) * 100) / 100]);
     }
   });
+});
+
+app.post('/inference', (req, res) => {
+  fs.writeFileSync(jsonPath, JSON.stringify(req.body));
+
+  const result = Object.keys(req.body).reduce((acc, key) => ({
+    ...acc,
+    [key]: key !== 'winner' ? 'very good' : 'away'
+  }), {});
+  res.json(result);
+
+  /* exec(`Rscript ${rInferencePath}`, (err, stdout) => {
+    if (err) {
+      res.status(500).json(err);
+    } else {
+      const result = Object.keys(req.body).reduce((acc, key) => ({
+        ...acc,
+        [key]: key !== 'winner' ? 'very good' : 'away'
+      }), {});
+      res.json(result);
+    }
+  }); */
 });
 
 app.listen(1234, function () {
