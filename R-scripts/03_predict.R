@@ -1,29 +1,38 @@
 #install.packages("bnlearn")
+#install.packages("caret");
 
 library("bnlearn");
+library("caret");
 
-setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-#setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
-data = read.csv("dataset.csv", header = TRUE);
-data$winner = factor(ifelse(data$winner == "home", "home", "away"));
+dfull1 = read.csv("dataset.csv", header = TRUE);
+dfull1$winner = factor(ifelse(dfull1$winner == "home", "home", "away"));
 
-data$id = NULL;
-data$league_id = NULL;
-data$home_goals = NULL;
-data$away_goals = NULL;
-data$home_def_count = NULL;
-data$away_def_count = NULL;
-data$home_mid_count = NULL;
-data$away_mid_count = NULL;
-data$home_atk_count = NULL;
-data$away_atk_count = NULL;
+dfull1$id = NULL;
+dfull1$league_id = NULL;
+dfull1$home_goals = NULL;
+dfull1$away_goals = NULL;
+dfull1$home_def_count = NULL;
+dfull1$away_def_count = NULL;
+dfull1$home_mid_count = NULL;
+dfull1$away_mid_count = NULL;
+dfull1$home_atk_count = NULL;
+dfull1$away_atk_count = NULL;
+dfull1$home_atk_score = NULL;
+dfull1$home_def_score = NULL;
+dfull1$away_atk_score = NULL;
+dfull1$away_def_score = NULL;
 
-#dag = mmhc(data);
-#dag = tabu(data);
-#dag = gs(data);
-#dag = hpc(data);
-#dag = mmpc(data);
+#dag = mmhc(dfull1);
+#dag = tabu(dfull1);
+#dag = gs(dfull1);
+#dag = hpc(dfull1);
+#dag = mmpc(dfull1);
+
+
+## Build structure
 
 home_attr = c("home_gk", "home_def", "home_mid", "home_atk");
 away_attr = c("away_gk", "away_def", "away_mid", "away_atk");
@@ -32,21 +41,49 @@ bl = rbind(
   as.matrix(expand.grid(away_attr, home_attr))
 );
 
-dag = hc(data, blacklist = bl);
-fitted = bn.fit(dag, data);
+connect_to_winner = c("home_def", "away_def", "home_atk", "away_atk", 
+                      "home_mid", "away_mid", "home_gk", "away_gk");
 
-res = cpquery(
-  fitted,
-  event = (winner == "home"),
-  evidence = ((home_mid == "very good") & (away_mid == "very bad"))
-);
+# auto building with blacklist and whitlist
+dag = hc(dfull1, blacklist = bl#, 
+         #whitelist = data.frame(from = connect_to_winner,to = rep("winner", length(connect_to_winner)))
+         );
+plot(dag);
 
-resk = bn.cv(method = "k-fold", data = data, bn = dag, loss = "pred", loss.args = list(target = "winner"));
+
+## divide into train and test set
+smp_size <- floor(0.75 * nrow(dfull1))
+train_ind <- sample(seq_len(nrow(dfull1)), size = smp_size)
+dtrain <- dfull1[train_ind, ]
+dtest <- dfull1[-train_ind, ]
+
+
+## LEARNING MODEL
+fitted = bn.fit(dag, dtrain);
+
+## query
+# res = cpquery(
+#   fitted,
+#   event = (winner == "home"),
+#   evidence = ((home_mid == "very good") & (away_mid == "very bad"))
+# );
+# print(res);
+
+resk = bn.cv(method = "k-fold", data = dfull1, bn = dag, loss = "pred", loss.args = list(target = "winner"));
+print(resk)
+
 
 # Prediction
-pred = predict(fitted, "winner", data, prob=TRUE);
-predicted_class = pred;
-a = table(predicted_class, data$winner);
-cat("Accuracy:", mean(predicted_class == data$winner));
+pred = matrix(0, nrow = length(1000), ncol = ncol(dfull1));
+for (col in colnames(pred)){
+  pred[, col] = predict(fitted, node = col, data = dtest[, nodes(dag)]);
+}
+print(pred);
 
-cat(0.7);
+
+#pred = predict(fitted, "winner", dtest, prob=TRUE);
+#cat("Accuracy:", mean(pred == dtest$winner, na.rm = TRUE));
+
+
+
+
