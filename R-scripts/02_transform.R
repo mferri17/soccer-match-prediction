@@ -1,25 +1,29 @@
-#install.packages("bnlearn")
-#install.packages("RSQLite")
-#install.packages("DataExplorer");
-#install.packages("arules");
-#install.packages("plyr");
-#install.packages("GGally");
+# install.packages("DataExplorer", dependencies = TRUE);
+# install.packages("igraph", dependencies = TRUE);
+# install.packages("bnlearn", dependencies = TRUE);
+#install.packages("caret", dependencies = TRUE);
+# install.packages("gower", dependencies = TRUE);
+#install.packages("arules", dependencies = TRUE);
 
 library("DataExplorer");
 library("arules");
 
-setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-dataset = read.csv("../dataset/FINAL.csv", header = TRUE);
+
+#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+
+
+final = read.csv("../dataset/FINAL.csv", header = TRUE);
 
 # remove rows with NA inside
-rows = !(is.na(dataset$home_team_goal)) & !(is.na(dataset$away_team_goal));
+rows = !(is.na(final$home_team_goal)) & !(is.na(final$away_team_goal));
 for (type in c("home", "away")) {
   for (i in 1:11) {
-    rows = rows & !(is.na(dataset[[sprintf("%s%d_overall_rating", type, i)]])) & !(is.na(dataset[[sprintf("%s_player_Y%d", type, i)]]));
+    rows = rows & !(is.na(final[[sprintf("%s%d_overall_rating", type, i)]])) & !(is.na(final[[sprintf("%s_player_Y%d", type, i)]]));
   }
 }
 
-dataset = dataset[rows, ];
+final = final[rows, ];
 
 
 # given a row, this function computes a role-based aggregation for overall_rating
@@ -95,11 +99,11 @@ mapRow = function(x) {
 };
 
 
-
-# dataset frame transformation
-lists = apply(dataset, 1, mapRow);
+# data frame transformation
+lists = apply(final, 1, mapRow);
 newData = data.frame(matrix(unlist(lists), nrow=length(lists), byrow=T),stringsAsFactors=FALSE);
 colnames(newData) = names(lists[[1]]);
+
 
 
 # type casting
@@ -125,14 +129,14 @@ for (type in c("home", "away")) {
 
 
 # update overall-rating given players per role count
-for (type in c("home", "away")) {
-  for (role in c("def", "mid", "atk")) {
-    newData[sprintf("%s_%s", type, role)] = round(apply(newData, 1, function(x) 
-      as.numeric(x[sprintf("%s_%s", type, role)]) + 
-        log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(newData[[sprintf("%s_%s_count", type, role)]]))*20));
-    # mean should be taken out of this loop
-  }
-}
+# for (type in c("home", "away")) {
+#   for (role in c("def", "mid", "atk")) {
+#     newData[sprintf("%s_%s", type, role)] = round(apply(newData, 1, function(x) 
+#       as.numeric(x[sprintf("%s_%s", type, role)]) + 
+#         log(as.numeric(x[sprintf("%s_%s_count", type, role)]) / mean(newData[[sprintf("%s_%s_count", type, role)]]))*20));
+#     # mean should be taken out of this loop
+#   }
+# }
 
 newData$home_def_score <- with(newData, home_gk + home_def + home_mid);
 newData$home_atk_score <- with(newData, home_atk + home_mid);
@@ -163,7 +167,7 @@ for (type in c("home", "away")) {
   atk_key = sprintf("%s_atk", type);
   
   for (key in c(gk_key, def_key, mid_key, atk_key)) {
-    discr[[key]] = discretize(discr[[key]], 
+    discr[[key]] = arules::discretize(discr[[key]], 
                                    method = "frequency", 
                                    breaks = 4, #c(-Inf, 68, 73, 76, Inf),
                                    labels = c("very bad", "bad", "good", "very good")
@@ -174,7 +178,7 @@ for (type in c("home", "away")) {
   for (role in c("atk", "def")) {
     key = sprintf("%s_%s_score", type, role);
     discr[[key]] = 
-      discretize(discr[[key]], 
+      arules::discretize(discr[[key]], 
                  method = "frequency", 
                  breaks = 6#,
                  #labels = c("1", "2", "3", "4", "5", "6")

@@ -1,13 +1,12 @@
-#install.packages("DataExplorer")
-#install.packages("bnlearn")
-install.packages("BiocManager")
-
-source("https://bioconductor.org/biocLite.R")
-biocLite("BiocInstaller")
+# install.packages("DataExplorer", dependencies = TRUE);
+# install.packages("igraph", dependencies = TRUE);
+# install.packages("bnlearn", dependencies = TRUE);
+#install.packages("caret", dependencies = TRUE);
+# install.packages("gower", dependencies = TRUE);
+#install.packages("arules", dependencies = TRUE);
 
 library("DataExplorer");
 library("bnlearn");
-library("graphviz.plot");
 
 #setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
@@ -35,8 +34,6 @@ dfull$away_atk_count = NULL;
 
 dag = model2network("[home_gk][home_def][home_mid][home_atk][home_def_score|home_gk:home_def:home_mid][home_atk_score|home_mid:home_atk][away_gk][away_def][away_mid][away_atk][away_def_score|away_gk:away_def:away_mid][away_atk_score|away_mid:away_atk][winner|home_def_score:home_atk_score:away_def_score:away_atk_score]");
 plot(dag);
-graphviz.plot(dag, highlight = NULL, groups, layout = "dot",
-              shape = "circle", main = NULL, sub = NULL, render = TRUE)
 
 
 ## divide into train and test set
@@ -51,12 +48,10 @@ test <- dfull[-train_ind, ]
 fitted = bn.fit(dag, train);
 
 ## save model on file
-saveRDS(dfull, file = "bayesian_network.rds");
+#saveRDS(dfull, file = "bayesian_network.rds");
 
 
-
-
-# Prediction
+## Prediction
 pred = predict(fitted, "winner", test, prob=TRUE);
 cat("Accuracy:", mean(pred == test$winner, na.rm = TRUE));
 

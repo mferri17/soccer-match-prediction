@@ -1,13 +1,17 @@
-#install.packages("bnlearn")
-#install.packages("caret");
+# install.packages("DataExplorer", dependencies = TRUE);
+# install.packages("igraph", dependencies = TRUE);
+# install.packages("bnlearn", dependencies = TRUE);
+# install.packages("caret", dependencies = TRUE);
+# install.packages("gower", dependencies = TRUE);
 
+library("DataExplorer");
 library("bnlearn");
 library("caret");
 
 #setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
-dfull1 = read.csv("dataset.csv", header = TRUE);
+dfull1 = read.csv("dataset_1.csv", header = TRUE);
 dfull1$winner = factor(ifelse(dfull1$winner == "home", "home", "away"));
 
 dfull1$id = NULL;
@@ -58,8 +62,25 @@ dtrain <- dfull1[train_ind, ]
 dtest <- dfull1[-train_ind, ]
 
 
+
+
 ## LEARNING MODEL
 fitted = bn.fit(dag, dtrain);
+
+
+
+# Prediction
+# for (col in colnames(dfull1)){
+#   predict(fitted, node = col, data = dtest, prop= TRUE);
+#   cat("Accuracy", col, ":", mean(pred == dtest[[sprintf("%s", col)]], na.rm = TRUE), "\n");
+# }
+# print(pred);
+
+
+pred = predict(fitted, "winner", dtest);
+cat("Accuracy:", mean(pred == dtest$winner, na.rm = TRUE));
+
+
 
 ## query
 # res = cpquery(
@@ -68,21 +89,10 @@ fitted = bn.fit(dag, dtrain);
 #   evidence = ((home_mid == "very good") & (away_mid == "very bad"))
 # );
 # print(res);
+# 
+# resk = bn.cv(method = "k-fold", data = dfull1, bn = dag, loss = "pred", loss.args = list(target = "winner"));
+#print(resk)
 
-resk = bn.cv(method = "k-fold", data = dfull1, bn = dag, loss = "pred", loss.args = list(target = "winner"));
-print(resk)
-
-
-# Prediction
-pred = matrix(0, nrow = length(1000), ncol = ncol(dfull1));
-for (col in colnames(pred)){
-  pred[, col] = predict(fitted, node = col, data = dtest[, nodes(dag)]);
-}
-print(pred);
-
-
-#pred = predict(fitted, "winner", dtest, prob=TRUE);
-#cat("Accuracy:", mean(pred == dtest$winner, na.rm = TRUE));
 
 
 
