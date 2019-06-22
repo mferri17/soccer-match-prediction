@@ -174,6 +174,9 @@ for (type in c("home", "away")) {
   atk_key = sprintf("%s_atk", type);
   
   for (key in c(gk_key, def_key, mid_key, atk_key)) {
+    intervals = arules::discretize(discr[[key]], method = "frequency", breaks = 6, onlycuts = TRUE);
+    cat("\nDiscretization intervals for ", key, ": ", intervals);
+    
     discr[[key]] = 
       arules::discretize(discr[[key]],
                  method = "frequency", 
