@@ -1,21 +1,24 @@
 # install.packages("DataExplorer", dependencies = TRUE);
 # install.packages("igraph", dependencies = TRUE);
 # install.packages("bnlearn", dependencies = TRUE);
-#install.packages("caret", dependencies = TRUE);
+# install.packages("caret", dependencies = TRUE);
 # install.packages("gower", dependencies = TRUE);
-#install.packages("arules", dependencies = TRUE);
+# install.packages("arules", dependencies = TRUE);
 
 library("DataExplorer");
 library("arules");
-
+library("caret");
 
 #setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
 
+
+### DATASET
+
 final = read.csv("../dataset/FINAL.csv", header = TRUE);
 
-# remove rows with NA inside
+## remove rows with NA inside
 rows = !(is.na(final$home_team_goal)) & !(is.na(final$away_team_goal));
 for (type in c("home", "away")) {
   for (i in 1:11) {
@@ -26,7 +29,9 @@ for (type in c("home", "away")) {
 final = final[rows, ];
 
 
-# given a row, this function computes a role-based aggregation for overall_rating
+### FEATURES COMPUTATION
+
+# given a row, this function computes aN overall_rating role-based aggregation
 mapRow = function(x) {
   
   result = list(); # new row
@@ -61,7 +66,6 @@ mapRow = function(x) {
     
     
     for (i in 1:11) { # players
-      
       overall = as.numeric(x[sprintf("%s%d_overall_rating", type, i)]);
       position = as.numeric(x[sprintf("%s_player_Y%d", type, i)]);
       
@@ -78,11 +82,10 @@ mapRow = function(x) {
         count[4] = count[4] + 1;
         key = atk_key;
       }
-      
       result[key] = as.numeric(result[key]) + overall; # overall-ratings sum
     }
     
-    # computing average overall-rating for roles
+    # computing average values
     i = 0;
     for (key in keys) {
       i = i + 1;
@@ -99,7 +102,7 @@ mapRow = function(x) {
 };
 
 
-# data frame transformation
+# dataframe transform
 lists = apply(final, 1, mapRow);
 newData = data.frame(matrix(unlist(lists), nrow=length(lists), byrow=T),stringsAsFactors=FALSE);
 colnames(newData) = names(lists[[1]]);
@@ -127,7 +130,6 @@ for (type in c("home", "away")) {
   newData[[sprintf("%s_count", atk_key)]] = as.numeric(newData[[sprintf("%s_count", atk_key)]]);
 }
 
-
 # update overall-rating given players per role count
 # for (type in c("home", "away")) {
 #   for (role in c("def", "mid", "atk")) {
@@ -138,25 +140,30 @@ for (type in c("home", "away")) {
 #   }
 # }
 
-newData$home_def_score <- with(newData, home_gk + home_def + home_mid);
-newData$home_atk_score <- with(newData, home_atk + home_mid);
-newData$away_def_score <- with(newData, away_gk + away_def + away_mid);
-newData$away_atk_score <- with(newData, away_atk + away_mid);
+# overall grouping
+# newData$home_def_score <- with(newData, home_gk + home_def + home_mid);
+# newData$home_atk_score <- with(newData, home_atk + home_mid);
+# newData$away_def_score <- with(newData, away_gk + away_def + away_mid);
+# newData$away_atk_score <- with(newData, away_atk + away_mid);
 
+
+
+#plot_histogram(newData);
+#plot_bar(newData);
 
 # discretizaion intervals analysis (chosen empirically)
-#discretize(newData$home_gk, method = "frequency", breaks = 4);
-#discretize(newData$home_def, method = "frequency", breaks = 4);
-#discretize(newData$home_mid, method = "frequency", breaks = 4);
-#discretize(newData$home_atk, method = "frequency", breaks = 4);
-#discretize(newData$away_gk, method = "frequency", breaks = 4);
-#discretize(newData$away_def, method = "frequency", breaks = 4);
-#discretize(newData$away_mid, method = "frequency", breaks = 4);
-#discretize(newData$away_atk, method = "frequency", breaks = 4);
+# arules::discretize(newData$home_gk, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$home_def, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$home_mid, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$home_atk, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$away_gk, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$away_def, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$away_mid, method = "frequency", breaks = 6, onlycuts = TRUE);
+# arules::discretize(newData$away_atk, method = "frequency", breaks = 6, onlycuts = TRUE);
 
 
-### features discretization
 
+### FEATURE DISCRETIZATION
 
 discr = data.frame(newData);
 
@@ -167,33 +174,29 @@ for (type in c("home", "away")) {
   atk_key = sprintf("%s_atk", type);
   
   for (key in c(gk_key, def_key, mid_key, atk_key)) {
-    discr[[key]] = arules::discretize(discr[[key]], 
-                                   method = "frequency", 
-                                   breaks = 4, #c(-Inf, 68, 73, 76, Inf),
-                                   labels = c("very bad", "bad", "good", "very good")
-                                   );
-  }
-  
-  
-  for (role in c("atk", "def")) {
-    key = sprintf("%s_%s_score", type, role);
     discr[[key]] = 
-      arules::discretize(discr[[key]], 
+      arules::discretize(discr[[key]],
                  method = "frequency", 
-                 breaks = 6#,
-                 #labels = c("1", "2", "3", "4", "5", "6")
-                 );
+                 breaks = 6,
+                   labels = c("terrible", "bad", "mediocre", "good", "very good", "excellent")
+               );
   }
+  
+  # overall grouping
+  # for (role in c("atk", "def")) {
+  #   key = sprintf("%s_%s_score", type, role);
+  #   discr[[key]] =
+  #     arules::discretize(discr[[key]],
+  #                method = "frequency",
+  #                breaks = 6,
+  #                labels = c("terrible", "bad", "mediocre", "good", "very good", "excellent")
+  #             );
+  # }
 }
 
 plot_bar(discr);
 plot_histogram(discr);
 
 
-# saving CSV
-
+### SAVING CSV
 write.csv(discr, file = "dataset.csv",row.names=FALSE);
-
-
-
-
