@@ -119,13 +119,13 @@ Verrà infine presentata un'interfaccia utente per la simulazione di una partita
 
 \section{Descrizione del dataset originale}
 
-Di seguito viene presentata la descrizione del dataset originale, prelevato da Kaggle \cite{site:kaggle-dataset} e a sua volta creato attraverso l'unione di dati provenienti da diverse fonti, fra cui la più importante contenente le statistiche del famoso videogioco di calcio EA Sports FIFA. \cite{site:ea-fifa}.
+Di seguito viene presentata la descrizione del dataset originale, prelevato da Kaggle \cite{site:kaggle-dataset} e a sua volta creato attraverso l'unione di dati provenienti da diverse fonti, fra cui la più importante contenente le statistiche del famoso videogioco di calcio EA Sports FIFA. \cite{site:ea-fifa}. Il contenuto del dataset è rappresentato dalle principali squadre e giocatori di calcio in Europa, con le partite svolte in un periodo temporale di 6 anni.
 
 
 
 \subsection{Formato}
 
-Il dataset a disposizione per lo svolgimento dell'elaborato consiste in un database SQLite \cite{site:sqlite}, ovvero un file con l'omonima estensione contenente un database relazionale di rapido utilizzo, in grado di essere condiviso e utilizzato facilmente su un qualsiasi dispositivo. Sia dal linguaggio di programmazione Javascript che da R è stato possibile accedervi semplicemente installando un'apposita libreria.
+Il dataset consiste di un database SQLite \cite{site:sqlite}, ovvero un file con omonima estensione contenente un database relazionale di rapido utilizzo, in grado di essere condiviso e utilizzato facilmente su un qualsiasi dispositivo.
 
 
 
@@ -310,21 +310,22 @@ La tabella {\it Match} contiene tutte le informazioni relative le squadre che ha
 
 \section{Creazione del dataset per le predizioni}
 
-Affinché i dati a disposizione possano essere utilizzati per la predizione del risultato di una partita su base statistica, è necessario che vengano elaborati secondo un insieme di regole arbitrariamente scelte e su cui costruire i principi per portare a termine una specifica predizione. L'elaborazione stessa è perciò determinata sia attraverso delle assunzioni volte a identificare gli elementi più rilevanti nei dati, sia tramite l'effettiva esecuzione delle operazioni necessarie a trasformare il dataset originale in quello utilizzato per il modello di Rete Bayesiana.
+Affinché i dati a disposizione possano essere utilizzati per la predizione del risultato di una partita su base statistica è necessario che vengano elaborati secondo un insieme di regole arbitrariamente scelte e su cui costruire i principi per portare a termine una specifica predizione. L'elaborazione stessa è perciò determinata sia attraverso delle assunzioni volte a identificare gli elementi più rilevanti nei dati, sia tramite l'effettiva esecuzione delle operazioni necessarie a trasformare il dataset originale in quello utilizzato per modellare la Rete Bayesiana.
 
 
 \subsection{Ipotesi e assunzioni}
 
-Al fine di sviluppare il seguente progetto e procedere quindi con la stesura del seguente elaborato, sono state fatte delle assunzioni che fungono da base portante.
+Al fine di sviluppare il progetto e procedere con la stesura del seguente elaborato, sono state fatte delle assunzioni che fungono da base portante.
 
-Assumiamo per prima cosa una divisione del campo in varie aeree per classificare i ruoli dei giocatori in difesa, centrocampo e attacco. Non è infatti fornita tale informazione nel dataset di partenza.
+Si assume che il risultato di una partita, a sua volta determinato dal numero di goal segnati da una squadra e dall'altra, sia influenzato dalla bravura dei giocatori che partecipano alla partita stessa. Nel gioco del calcio, come in molti altri, esiste una netta suddivisione fra i compiti assegnati a ciascun giocatore che vanno a determinare il ruolo di quest'ultimo: \textbf{portiere}, \textbf{difensore}, \textbf{centrocampista} e \textbf{attaccante}. É chiaro che ogni ruolo riveste la sua particolare importanza e influisce in maniera diversa sull'esito della partita. Per questo progetto, si è pensato di costruire un modello basato proprio sulle potenzialità delle due squadre sfidanti nei diversi ruoli assunti dai giocatori. Poiché tale informazione è mancante all'interno del dataset originale, il primo step cui si è fatto fronte è stata la determinazione dei ruoli di ciascun giocatore in campo. Tale obiettivo è stato raggiunto attraverso l'ipotesi, più che ragionevole, secondo la quale la posizione di una persona sul campo da gioco determina anche il suo ruolo all'interno della squadra e della partita.
 
-In secondo luogo supponiamo che le caratteristiche del team siano effettivamente determinate solo dai giocatori che ne fanno parte, rendendo di fatto poco utile tale informazione al variare dei giocatori. Non avendo a disposizione inoltre informazioni circa l'appartenenza di un giocatore ad un determinato team nel tempo, non è possibile creare delle squadre ben formate. Esse si potrebbero ricavare direttamente dai match svolti, tuttavia ciò comporterebbe la creazione di dati incoerenti col mondo reale. Non è infatti assicurato che un giocatore non abbia cambiato squadra nel tempo o non sia stato assegnato ad una squadra errata poiché presente in quella nuova solo in panchina.
+In secondo luogo, si è scelto inoltre di supporre che le caratteristiche del team siano determinate solo dai giocatori che ne fanno parte. Non avendo a disposizione inoltre informazioni circa l'appartenenza di un giocatore ad un determinato team nel tempo, non è possibile ottenere una suddivisione dei giocatori in squadre ben formate. Nonostante quest'ultime si potrebbero ricavare direttamente dalle partite svolte, ciò comporterebbe la creazione di dati incoerenti col mondo reale poiché è risaputo che i giocatori di calcio sono soggetti ad un mercato di compra-vendita su base annuale. \\
+Per questo motivo, ai fini della predizione si è scelto di fatto di ignorare l'identità delle due squadre coinvolte in un match, ma semplicemente \textbf{limitarsi a considerare i 22 giocatori che hanno preso parte alla partita}, pesando adeguatamente le abilità che li contraddistinguono nel proprio ruolo.
 
 
-\subsection{Note tecniche}
+\subsection{Scelta del formato CSV}
 
-Per la creazione del dataset utile per la creazione della rete è stato scelto di rappresentare i dati in formato CSV in quanto più semplice e pratico da utilizzare rispetto al database relazionale inizialmente fornito. Sarebbe infatti stato necessario dal formato relazione ricondursi ad una unica tabella per far si che possa essere processata dal linguaggio R. Questo potrebbe portare tuttavia ad alcune problematiche relative la ristretta sintassi e funzionalità di SQLite.
+Per la creazione del dataset finale, utile per la modellazione della Rete Bayesiana, è stato scelto di trasformare il dataset in formato CSV, in quanto più semplice e pratico da utilizzare rispetto al database relazionale inizialmente fornito. Come si accennava, affinché possa essere creato il modello e su questo condotto delle previsioni, è necessario che i dati vengano elaborati e aggregati in un'unica tabella. Mentre SQLite consente agevolmente di lavorare sulle tabelle per effettuare \textit{join}, selezioni e proiezioni sul modello relazionale, il DBMS non è particolarmente comodo per conservare i dati una volta terminata l'aggregazione. A tale scopo si è preferito quindi esportare successivamente il risultato ottenuto all'interno di un file CSV, decisamente più portabile e immediatamente leggibile rispetto ad un database.
 
 
 \subsection{Aggregazione dei dati}
@@ -335,6 +336,21 @@ Per la creazione del dataset utile per la creazione della rete è stato scelto d
 
 
 \section{Rete Bayesiana}
+
+\subsection{Strumenti e librerie}
+
+\subsection{Assunzioni}
+
+\subsection{Generazione della rete}
+
+	\subsubsection{Autogenerazione della struttura}
+
+	\subsubsection{Vincoli introdotti}
+
+	\subsubsection{Esperimenti}
+	
+
+
 
 
 
