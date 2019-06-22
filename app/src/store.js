@@ -1,8 +1,7 @@
 import createStore from 'react-waterfall';
+import { getURL } from './utils';
 
 const LOCAL_STORAGE_KEY = 'configs';
-const BASE_URL = 'http://localhost:1234/';
-const getURL = url => `${BASE_URL}${url}`;
 
 const config = {
   initialState: {
