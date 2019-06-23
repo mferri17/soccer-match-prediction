@@ -78,9 +78,9 @@
 
 Il calcio è da anni lo sport più giocato e diffuso in svariati paesi del mondo. Moltissime persone seguono settimanalmente, con grande attenzione e fervore, ogni singola partita nella speranza di veder vincere la propria squadra del cuore.
 
-In questo contesto si sono inevitabilmente sviluppati un gran numero di diversi business di enorme valore economico, fra cui ad esempio quello delle scommesse. Saper prevedere l'esito di una partita, sia in termini di vittoria che di goal fatti, rappresenta per moltissimi un argomento di particolare interesse. Durante questo studio, ci si è posti l'obiettivo di sviluppare un modello per la predizione del risultato delle partite di calcio in maniera automatica. Tale predizione deve essere basata sulla formazione delle due squadre considerate per ciascuna partita, nonché sulle caratteristiche dei giocatori coinvolti.
+In questo contesto si sono inevitabilmente sviluppati un gran numero di business di enorme valore economico, fra cui ad esempio quello delle scommesse. Saper prevedere l'esito di una partita, sia in termini di vittoria che di goal segnati, rappresenta per moltissimi un argomento di particolare interesse. Durante questo studio, ci si è posti l'obiettivo di sviluppare un modello per la predizione del vincitore di una partita di calcio in maniera automatica. Tale predizione deve essere basata sulla formazione delle due squadre considerate per ciascuna partita, nonché sulle caratteristiche dei giocatori coinvolti.
 
-Il dominio di riferimento è stato modellato attraverso l'utilizzo di una Rete Bayesiana attraverso la quale fare le dovute inferenze e conseguentemente predire il risultato di una partita fra due squadre di calcio. Il medesimo approccio potrebbe essere riutilizzato in altri sport o giochi che prevedano l'interazione fra più squadre di cui si conoscono le statistiche di ciascun giocatore.
+Il dominio di riferimento è stato modellato attraverso l'utilizzo di una Rete Bayesiana attraverso la quale fare le dovute inferenze e conseguentemente predire il risultato di una partita combattuta fra due squadre di calcio. Il medesimo approccio potrebbe essere riutilizzato in altri sport o giochi che prevedano l'interazione fra più squadre di cui si conoscono le statistiche di ciascun giocatore.
 
 
 
@@ -685,6 +685,7 @@ Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identi
 
 
 \subsubsection{Qualche esempio}
+\label{sec:inference-examples}
 
 A scopo dimostrativo, si presentano in questa sede alcune delle inferenze che è possibile produrre attraverso la libreria \texttt{bnlearn} e l'ultima rete mostrata. I seguenti esempi sono stati generati attraverso l'interfaccia grafica che sarà spiegata nel capitolo \ref{sec:ui}.
 
@@ -699,6 +700,8 @@ P(winner = not home | home_mid = terrible, away_mid = excellent) = 0.908642
 \end{verbatim}
 
 Dai risultati, è possibile facilmente notare come la Rete sia in grado di stimare la probabilità che la squadra di casa sia vincente, sulla base dei valori attribuiti alle diverse variabili secondo la discretizzazione che sarà spiegata nel capitolo \ref{sec:perf-discret}. Gli esempi considerano il problema binario, per cui la squadra che gioca in casa può vincere o non vincere (ma senza sapere se si tratti di un pareggio o una sconfitta).
+
+Osservando le probabilità stimate dalla Rete si potrebbe affermare che queste siano effettivamente plausibili rispetto alle evidenze, avendo una conoscenza a priori del dominio che permette di valutare come le diverse componenti di una squadra possano influire sul risultato della partita.
 
 
 
@@ -788,7 +791,14 @@ Nella figura \ref{fig:hc-bin-all} è possibile osservare un esempio di Rete fra 
 
 \vspace{3ex}
 
-Un ulteriore tentativo lo si è fatto tentando di aggiungere due nuove feature per ciascuna squadra, che raggruppassero rispettivamente il potenziale difensivo (portiere + difesa + mid) e offensivo (mid + attacco) delle squadre. Avendo provato a generare una Rete Bayesiana con questi nuovi nodi, si sono comunque ottenute performance totalmente simili alle precedenti, motivo per cui si è poi deciso di tornare alla configurazione della Rete originale.
+Un ulteriore tentativo lo si è fatto tentando di aggiungere due nuove feature per ciascuna squadra, che raggruppassero rispettivamente il potenziale difensivo (portiere + difesa + mid) e offensivo (mid + attacco) delle squadre. Avendo provato a generare una Rete Bayesiana con questi nuovi nodi, si sono comunque ottenute performance totalmente simili alle precedenti, motivo per cui si è poi deciso di tornare alla configurazione della Rete originale. Tale struttura è per comodità riportata qui sotto (figura \ref{img:hc-bin-bl_2}), seppur uguale a quella presentata nel capitolo precedente.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{images/05_02_hc_bin_bl.png}
+	\caption[Struttura scelta per la rete Bayesiana]{Struttura scelta per la rete Bayesiana}
+	\label{img:hc-bin-bl_2}
+\end{figure}
 
 
 \subsubsection{Discretizzazione delle features}
@@ -907,6 +917,7 @@ Dalle metriche misurate si evince un valore accettabile di veri positivi nel con
 Probabilmente ciò è dovuto all'effettiva difficoltà nel riuscire a predire il vincitore di una partita di calcio se ci si limita a osservare le caratteristiche dei giocatori che le compongono. Ciò accade perché molte volte si assiste a partite nelle quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore un'operazione diventa decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore.
 
 
+\clearpage
 \subsubsection{ROC curve e AUC}
 
 Come ultima metrica di valutazione si è scelto di considerare anche il grafico della \textit{receiver operating characteristic curve} per mettere in relazione la percentuale di veri e falsi positivi. Questa si può osservare in figura \ref{fig:perf-roc}.
@@ -918,7 +929,7 @@ Come ultima metrica di valutazione si è scelto di considerare anche il grafico 
 	\label{fig:perf-roc}
 \end{figure}
 
-Dal grafico della ROC è quindi stato possibile calcolare l'\textit{area under curve}, che determina la bontà generale del modello di predizione. \\ Il valore dell'AUC è risultato pari a 0.6103608.
+Dal grafico della ROC è quindi stato possibile calcolare l'\textit{area under curve}, che determina la bontà generale del modello di predizione. Il valore dell'AUC per la curva rappresentata in figura è risultato pari a 0,61.
 
 
 
@@ -1018,7 +1029,15 @@ Nella parte destra vengono invece mostrati una serie di campi di input per confi
 
 \section{Conclusioni}
 
+Alla luce degli esperimenti condotti e dei risultati ottenuti, è possibile affermare che le Reti Bayesiane modellate non sono state particolarmente accurate nella predizione degli esiti di una partita di calcio.
 
+Con riferimento agli esempi mostrati al capitolo \ref{sec:inference-examples}, è possibile affermare che tramite il processo di inferenza sulla Rete sia possibile ottenere delle probabilità condizionate ragionevoli per la variabile della query, considerate le evidenze. Ciò comunque non è sufficiente per predire con adeguata accuratezza un buon numero di vincitori su un dataset di partite.
+
+Nonostante come già spiegato il dataset fosse mal distribuito fra partite vinte, perse e pareggiate per la squadra in casa (figura \ref{img:perf-target-distr}), non crediamo che il motivo delle prestazioni deludenti siano dovute a questo. Lo stesso ragionamento lo si può applicare per valutare le Reti Bayesiane come metodo per modellare il dominio scelto; sono stati condotti degli esperimenti con altri modelli di Machine Learning (Naive Bayes e Random Forest), i quali hanno evidenziato risultati del tutto paragonabili a quelli ottenuti con la Rete Bayesiana descritta in questo elaborato.
+
+Il problema principale che si affronta quando si vuole predire il risultato di una partita di calcio sta nel fatto che moltissime volte, in questo sport, si assiste a match nei quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore un'operazione diventa decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore. L'esito di una partita dipende da innumerevoli ragioni che non si possono ricondurre semplicemente in quelle che sono solamente le capacità tecniche dei giocatori coinvolti. La mentalità di gioco dei singoli e dell'intero team, ad esempio, sono elementi fondamentali da considerare quando si pensa alla competizione fra due sistemi complessi quali sono le squadre di calcio nella loro interazione in campo.
+
+Quindi, sebbene il risultato ottenuto sia parzialmente corretto, è normale che non si riesca a raggiungere livelli di predizione ottimali. É opportuno anche considerare che questa componente di incertezza nell'esito di una partita è il motivo stesso per cui esiste il business delle scommesse e lo sport stesso, che altrimenti si ridurrebbero ad un mero insieme di numeri e probabilità.
 
 
 
