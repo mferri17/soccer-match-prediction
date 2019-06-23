@@ -12,8 +12,9 @@ Struttura file e cartelle:
 - MPD-BassoFerri-Slides.pdf: presentazione del progetto
 
 - dataset
-    - MATCH_JOIN.csv:
-        dataset risultante dal join delle tabelle Match e PlayerAttributes del database d'origine, come spiegato nella relazione
+    - database.zip: database originale
+    - MATCH_JOIN.zip: dataset risultante dall'esecuzione di sql_joiner.js
+    - sql_joiner.js: effettua il join di Match e PlayerAttributes, come spiegato in relazione
 
 - R-scripts: codici R
     - 01_analyze.R: analisi esplorativa del dataset

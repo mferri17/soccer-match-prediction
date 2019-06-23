@@ -30,7 +30,7 @@ replaceNA = function(data) rapply(
 dfull1 = read.csv("dataset.csv", header = TRUE);
 
 ## reducing to binary problem
-#dfull1$winner = factor(ifelse(dfull1$winner == "home", "home", "not home"));
+dfull1$winner = factor(ifelse(dfull1$winner == "home", "home", "not home"));
 
 dfull1$id = NULL;
 dfull1$league_id = NULL;
@@ -66,12 +66,6 @@ wl = data.frame(from = connect_to_winner,to = rep("winner", length(connect_to_wi
 
 
 # NET CREATION
-
-#dag = mmhc(dfull1);
-#dag = tabu(dfull1);
-#dag = gs(dfull1);
-#dag = hpc(dfull1);
-#dag = mmpc(dfull1);
 
 dag = hc(dfull1
          ,blacklist = bl

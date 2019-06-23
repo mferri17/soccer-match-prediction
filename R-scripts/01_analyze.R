@@ -1,5 +1,5 @@
-#install.packages("bnlearn")
-#install.packages("RSQLite")
+#install.packages("bnlearn");
+#install.packages("RSQLite");
 #install.packages("DataExplorer");
 #install.packages("arules");
 #install.packages("plyr");
