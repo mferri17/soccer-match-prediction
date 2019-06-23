@@ -31,221 +31,230 @@
 
 \begin{document}
 	
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	\begin{titlepage}
-		\centering
-		\vspace*{0.5 cm}
-		\includegraphics[scale = 0.75]{images/LogoBicocca.pdf}\\[1.0 cm]	% University Logo
-		\textsc{\LARGE Università degli studi di}\\[0.2 cm]
-		\textsc{\LARGE Milano-Bicocca}\\[2.0 cm]	% University Name
-		\textsc{\Large F1801Q127}\\[0.5 cm]				% Course Code
-		\textsc{\large Modelli probabilistici per le decisioni}				% Course Name
-		\rule{\linewidth}{0.2 mm} \\[0.4 cm]
-		{ \huge \bfseries \thetitle}\\
-		\rule{\linewidth}{0.2 mm} \\[1.5 cm]
-		
-		\begin{minipage}{0.4\textwidth}
-			\begin{flushleft} \large
-				\emph{Studenti:}\\
-				\theauthor
-			\end{flushleft}
-		\end{minipage}~
-		\begin{minipage}{0.4\textwidth}
-			\begin{flushright} \large
-				\emph{Matricole:} \\
-				807628 \\ 807130
-			\end{flushright}
-		\end{minipage}\\[2 cm]
-		
-		{\large \thedate}\\[2 cm]
-		
-		\vfill
-		
-	\end{titlepage}
-	
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	\tableofcontents
-	\pagebreak
-	
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	
-	
-	\section{Abstract}
-	
-	Il calcio rappresenta, soprattutto negli ultimi anni, lo sport maggiormente diffuso in vari paesi del mondo. Molte persone seguono con grande attenzione tutte le partite cercando di capire preventivamente il vincitore, per piacere personale oppure per giocare nel mercato delle scommesse. Ci si è posti quindi la domanda se tale predizione possa essere effettuata da un computer. L'obiettivo di questo progetto risulta dunque quello di predire il risultato delle partite di calcio basandosi sulla formazione e sulle caratteristiche dei giocatori coinvolti.
-	
-	
-	
-	
-	\section{Introduzione}
-	
-	Viene qui presentata una visione generale del progetto, ovvero il dominio di riferimento e gli obiettivi che si pone, le scelte di design per la creazione del dataset ed eventuali ipotesi o assunzioni fatte durante lo sviluppo dell'elaborato.
-	
-	
-	
-	\subsection{Dominio di riferimento}
-	
-	Il calcio rappresenta, soprattutto negli ultimi anni, lo sport maggiormente diffuso in vari paesi del mondo. Molte persone seguono con grande attenzione tutte le partite cercando di capire preventivamente il vincitore, per piacere personale oppure per giocare nel mercato delle scommesse.
-	
-	A seguito di questo fenomeno sono stati creati svariati portali che permettessero alle persone di entrare sempre di più in questo mondo. Un aspetto fondamentale per ogni piattaforma di questo genere è quello di predire il vincitore di un match simulando partite di calcio con particolari formazioni.
-	
-	
-	
-	\subsection{Obiettivi dell'elaborato}
-	
-	Nel seguente elaborato verranno esplicati i criteri che hanno portato alla scelta della creazione del dataset e alle modalità di acquisizione dei dati dalla sorgente. Successivamente, saranno presentate alcune analisi qualitative e descritti i procedimenti svolti per l'integrazione e l'estrazione delle informazioni.
-	
-	Successivamente all'esportazione del dataset verrà creato ed esplorato il training set per la creazione della rete Bayesiana, utilizzando diversi modelli di apprendimento, condotti degli esperimenti e analizzati i risultati.
-	
-	L'obiettivo del progetto è quello di predire il team vincitore di un determinato match, incrociando le informazioni del match stesso con quelle dei giocatori presenti in campo.
-	
-	Viene presentata infine una semplice interfaccia grafica utile a mostrare l'effettivo impiego della rete in un prodotto web.
-	
-	
-	\subsection{Scelte di design per la creazione del dataset}
-	
-	Per la creazione del dataset utile per la creazione della rete è stato scelto di rappresentare i dati in formato CSV in quanto più semplice e pratico da utilizzare rispetto al database relazionale inizialmente fornito. Sarebbe infatti stato necessario dal formato relazione ricondursi ad una unica tabella per far si che possa essere processata dal linguaggio R. Questo potrebbe portare tuttavia ad alcune problematiche relative la ristretta sintassi e funzionalità di SQLite.
-	
-	
-	
-	\subsection{Ipotesi e assunzioni}
-	
-	Al fine di sviluppare il seguente progetto e procedere quindi con la stesura del seguente elaborato, sono state fatte delle assunzioni che fungono da base portante.
-	
-	Assumiamo per prima cosa una divisione del campo in varie aeree per classificare i ruoli dei giocatori in difesa, centrocampo e attacco. Non è infatti fornita tale informazione nel dataset di partenza.
-	
-	In secondo luogo supponiamo che le caratteristiche del team siano effettivamente determinate solo dai giocatori che ne fanno parte, rendendo di fatto poco utile tale informazione al variare dei giocatori. Non avendo a disposizione inoltre informazioni circa l'appartenenza di un giocatore ad un determinato team nel tempo, non è possibile creare delle squadre ben formate. Esse si potrebbero ricavare direttamente dai match svolti, tuttavia ciò comporterebbe la creazione di dati incoerenti col mondo reale. Non è infatti assicurato che un giocatore non abbia cambiato squadra nel tempo o non sia stato assegnato ad una squadra errata poiché presente in quella nuova solo in panchina.
-	
-	
-	\clearpage
-	\section{Dataset}
-	
-	Di seguito viene presentata la descrizione del dataset.
-	
-	\subsection{Formato}
-	
-	Il dataset a disposizione per lo svolgimento dell'elaborato consiste in un database SQLite \cite{site:sqlite}, ovvero un file con l'omonima estensione, in grado di essere condiviso e utilizzato su un qualsiasi dispositivo. Sia dal linguaggio di programmazione Javascript che da R è stato possibile accedervi semplicemente installando un'apposita libreria.
-	
-	\subsection{Giocatori}
-	
-	I giocatori sono espressi all'interno di 2 tabelle differenti nello schema del database considerato. La prima relazione denominata {\it Player} contiene informazioni di carattere generale e viene descritta nella tabella \ref{tab:player}.
-	
-	\begin{table}[H]
-		\caption{Player}\label{tab:player}
-		\begin{tabular}{|l|l|l|}
-			\hline
-			Campo & Descrizione \\
-			\hline
-			id & Id del record \\
-			player\_api\_id & Identificativo univoco del giocatore \\
-			player\_name & Nome completo del giocatore \\
-			player\_fifa\_api\_id & Id utile per reperire le informazioni da fifa \\
-			birthday & Data di nascita \\
-			height & Altezza in centimetri \\
-			weight & Peso in libbre \\
-			\hline
-		\end{tabular}
-	\end{table}
-	
-	La seconda tabella, denominata {\it PlayerAttributes} contiene invece i punteggi associati alle abilità del giocatore. Essa contiene inoltre un campo che indica a quale data tali punteggi si riferiscono. Può essere infatti che essi cambino nel tempo e per questo è necessario selezionare quelli giusti in base alla data della partita. Nella tabella \cite{tab:player_attr} viene descritta tale relazione.
-	
-	\begin{table}[H]
-		\caption{PlayerAttributes}\label{tab:player_attr}
-		\begin{tabular}{|l|l|l|}
-			\hline
-			Campo & Descrizione \\
-			\hline
-			id & Id del record \\
-			player\_api\_id & Identificativo univoco del giocatore \\
-			player\_fifa\_api\_id & Id utile per reperire le informazioni da fifa \\
-			date & Data di riferimento del record \\
-			overall\_rating & Valutazione generale \\
-			potential & Potenziale \\
-			preferred\_foot & Piede preferito \\
-			attacking\_work\_rate & Punteggio di attacco \\
-			defensive\_work\_rate & Punteggio di difesa \\
-			crossing & Cross \\
-			finishing & Capacità di segnare \\
-			heading\_accuracy & Tiro di testa \\
-			short\_passing & Passaggio corto \\
-			volleys & Tiro al volo \\
-			dribbling & Dribbling \\
-			curve & Data di nascita \\
-			free\_kick\_accuracy & Accuratezza calcio di punizione \\
-			long\_passing & Passaggio lungo \\
-			ball\_control & Controllo di palla \\
-			acceleration & Accelerazione \\
-			sprint\_speed & Velocità sprint \\
-			agility & Agilità \\
-			reactions & Altezza in centimetri \\
-			balance & Equilibrio \\
-			shot\_power & Potenza di tiro \\
-			jumping & Salto \\
-			stamina & Stamina \\
-			strength & Forza \\
-			long\_shots & Tiro lungo \\
-			aggression & Aggressività \\
-			interceptions & Intercettare \\
-			positioning & Posizionamento \\
-			vision & Vista \\
-			penalties & Falli commessi \\
-			marking & Capacità di marcare \\
-			standing\_tackle & Contrasto \\
-			sliding\_tackle & Scivolata \\
-			gk\_diving & Tuffo portiere \\
-			gk\_handling & Presa portiere \\
-			gk\_kicking & Calcio da portiere \\
-			gk\_positioning & Posizionamento portiere \\
-			gk\_reflexes & Riflessi portiere \\
-			\hline
-		\end{tabular}
-	\end{table}
-	
-	\subsection{Squadre}
-	
-	Le squadre sono espresse in modo analogo ai player tramite 2 tabelle differenti, {\it Team} \ref{tab:team} e {\it TeamAttributes} \ref{tab:team_attr} riportate di seguito.
-	
-	\begin{table}[H]
-		\caption{Team}\label{tab:team_attr}
-		\begin{tabular}{|l|l|l|}
-			\hline
-			Campo & Descrizione \\
-			\hline
-			id & Id del record \\
-			team\_api\_id & Identificativo univoco della sqaudra \\
-			team\_name & Nome completo della squadra \\
-			team\_fifa\_api\_id & Id utile per reperire le informazioni da fifa \\
-			date & Data di riferimento del record \\
-			buildUpPlaySpeed & Velocità di gioco \\
-			buildUpPlaySpeedClass & Descretizzazione velocità di gioco \\
-			buildUpPlayDribbling & Dribbling \\
-			buildUpPlayDribblingClass & Descretizzazione dribbling \\
-			buildUpPlayPassing & Passaggio \\
-			buildUpPlayPassingClass & Descretizzazione passaggio \\
-			buildUpPlayPositioningClass & Posizionamento della squadra, definito o libero \\
-			chanceCreationPassing & Creazione chance di passaggio \\
-			chanceCreationPassingClass & Descretizzazione creazione chance di passaggio \\
-			chanceCreationCrossing & Creazione chance di cross \\
-			chanceCreationCrossingClass & Descretizzazione creazione chance di cross \\
-			chanceCreationShooting & Creazione chance di tiro in porta \\
-			chanceCreationShootingClass & Descretizzazione creazione chance di tiro in porta \\
-			chanceCreationPositioningClass & Creazione chance di posizionamento \\
-			defencePressure & Pressing della difesa \\
-			defencePressureClass & Descretizzazione pressing della difesa \\
-			defenceAggression & Aggressività della difesa  \\
-			defenceAggressionClass & Descretizzazione aggressività della difesa \\
-			defenceTeamWidth & Copertura della difesa \\
-			defenceTeamWidthClass & Descretizzazione copertura della difesa \\
-			defenceDefenderLineClass & Tipologia di difesa \\
-			\hline
-		\end{tabular}
-	\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	\begin{table}[H]
+\begin{titlepage}
+	\centering
+	\vspace*{0.5 cm}
+	\includegraphics[scale = 0.75]{images/LogoBicocca.pdf}\\[1.0 cm]	% University Logo
+	\textsc{\LARGE Università degli studi di}\\[0.2 cm]
+	\textsc{\LARGE Milano-Bicocca}\\[2.0 cm]	% University Name
+	\textsc{\Large F1801Q127}\\[0.5 cm]				% Course Code
+	\textsc{\large Modelli probabilistici per le decisioni}				% Course Name
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \thetitle}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushleft} \large
+			\emph{Studenti:}\\
+			\theauthor
+		\end{flushleft}
+	\end{minipage}~
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushright} \large
+			\emph{Matricole:} \\
+			807628 \\ 807130
+		\end{flushright}
+	\end{minipage}\\[2 cm]
+	
+	{\large \thedate}\\[2 cm]
+	
+	\vfill
+	
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{Abstract}
+
+Il calcio è da anni lo sport più giocato e diffuso in svariati paesi del mondo. Moltissime persone seguono settimanalmente, con grande attenzione e fervore, ogni singola partita nella speranza di veder vincere la propria squadra del cuore.
+
+In questo contesto si sono inevitabilmente sviluppati un gran numero di diversi business di enorme valore economico, fra cui ad esempio quello delle scommesse. Saper prevedere l'esito di una partita, sia in termini di vittoria che di goal fatti, rappresenta per moltissimi un argomento di particolare interesse. Durante questo studio, ci si è posti l'obiettivo di sviluppare un modello per la predizione del risultato delle partite di calcio in maniera automatica. Tale predizione deve essere basata sulla formazione delle due squadre considerate per ciascuna partita, nonché sulle caratteristiche dei giocatori coinvolti.
+
+Il dominio di riferimento è stato modellato attraverso l'utilizzo di una Rete Bayesiana attraverso la quale fare le dovute inferenze e conseguentemente predire il risultato di una partita fra due squadre di calcio. Il medesimo approccio potrebbe essere riutilizzato in altri sport o giochi che prevedano l'interazione fra più squadre di cui si conoscono le statistiche di ciascun giocatore.
+
+
+
+\clearpage
+
+
+
+\section{Introduzione}
+
+Viene qui presentata una visione generale del progetto, ovvero il dominio di riferimento e gli obiettivi che esso si pone, le scelte di design per la creazione del dataset ed eventuali ipotesi o assunzioni fatte durante lo sviluppo dell'elaborato.
+
+
+
+\subsection{Dominio di riferimento}
+
+Il calcio rappresenta, soprattutto negli ultimi anni, lo sport maggiormente diffuso in vari paesi del mondo. Molte persone seguono con grande attenzione tutte le partite cercando di capire preventivamente il vincitore, per piacere personale oppure per giocare nel mercato delle scommesse.
+
+A seguito di questo fenomeno sono stati creati svariati portali che permettessero alle persone di entrare sempre di più in questo mondo. Un aspetto fondamentale per ogni piattaforma di scommesse è senz'altro la possibilità di predire il vincitore di un match attraverso la simulazione di partite di calcio con particolari formazioni.
+
+
+
+\subsection{Obiettivi dell'elaborato}
+
+Questo elaborato sarà suddiviso per argomenti, secondo un approccio di indagine incrementale e coerente con quanto praticamente svolto.
+
+Verranno innanzitutto descritte le modalità di acquisizione dei dati dalla sorgente, a cui sarà associata anche una breve descrizione di quanto a disposizione. Quindi, si esploreranno i criteri e le assunzioni che hanno portato alla creazione del dataset su cui sviluppare il modello di predizione. Con questo, si intende dire che verranno inizialmente presentate alcune analisi qualitative sui dati e successivamente descritti i procedimenti svolti per l'integrazione e l'estrazione delle informazioni più rilevanti.
+
+In seguito all'esportazione del dataset saranno descritte le modalità di suddivisione del dataset su cui fare inferenze, in particolare attraverso l'utilizzo delle Reti Bayesiane. Diversi modelli di generazione della rete verranno presentati e per ognuno saranno analizzati i risultati ed evidenziate le differenze. L'obiettivo del modello è quello di predire il team vincitore di un determinato match, utilizzando le informazioni dei giocatori presenti in campo.
+
+Verrà infine presentata un'interfaccia utente per la simulazione di una partita di calcio, utile a mostrare l'effettivo impiego della rete in un prodotto di natura commerciale e pensato per l'utilizzo sul Web.
+
+
+
+\clearpage
+
+
+
+\section{Descrizione del dataset originale}
+
+Di seguito viene presentata la descrizione del dataset originale, prelevato da Kaggle \cite{site:kaggle-dataset} e a sua volta creato attraverso l'unione di dati provenienti da diverse fonti, fra cui la più importante contenente le statistiche del famoso videogioco di calcio EA Sports FIFA. \cite{site:ea-fifa}. Il contenuto del dataset è rappresentato dalle principali squadre e giocatori di calcio in Europa, con le partite svolte in un periodo temporale di 6 anni.
+
+
+
+\subsection{Formato}
+
+Il dataset consiste di un database SQLite \cite{site:sqlite}, ovvero un file con omonima estensione contenente un database relazionale di rapido utilizzo, in grado di essere condiviso e utilizzato facilmente su un qualsiasi dispositivo.
+
+
+
+\subsection{Giocatori}
+
+I giocatori sono espressi all'interno di due tabelle differenti nello schema del database considerato. La prima relazione denominata {\it Player} contiene informazioni di carattere generale ed è mostrata in tabella \ref{tab:player} a seguire.
+
+\begin{table}[H]
+	\caption{Player}\label{tab:player}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		Campo & Descrizione \\
+		\hline
+		id & Id del record \\
+		player\_api\_id & Identificativo univoco del giocatore \\
+		player\_name & Nome completo del giocatore \\
+		player\_fifa\_api\_id & Id utile per reperire le informazioni da fifa \\
+		birthday & Data di nascita \\
+		height & Altezza in centimetri \\
+		weight & Peso in libbre \\
+		\hline
+	\end{tabular}
+\end{table}
+
+La seconda tabella, denominata {\it PlayerAttributes} contiene invece i punteggi associati alle abilità personali di ciascun giocatore. Essa contiene inoltre un campo che indica a quale data tali punteggi si riferiscono, cioè quando sono state effettuate le rilevazioni. É possibile, infatti, che i dati associati ad un giocatore cambino nel tempo; per tale motivo, nel momento in cui si rivelerà necessario recuperare i dati dei giocatori facenti partecipanti ad una partita, sarà necessario selezionare i giusti record dalla tabella \textit{Player} proprio in base alla data della partita.
+
+Nella tabella \ref{tab:player_attr} vengono meglio elencati i campi che descrivono un giocatore. La maggior parte di essi sono espressi su una scala intera da 1 a 100.
+
+\begin{table}[H]
+	\caption{PlayerAttributes}\label{tab:player_attr}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		Campo & Descrizione \\
+		\hline
+		id & Id del record \\
+		player\_api\_id & Identificativo univoco del giocatore \\
+		player\_fifa\_api\_id & Id utile per reperire le informazioni da FIFA \\
+		date & Data di riferimento del record \\
+		overall\_rating & Valutazione generale \\
+		potential & Potenziale \\
+		preferred\_foot & Piede preferito \\
+		attacking\_work\_rate & Punteggio di attacco \\
+		defensive\_work\_rate & Punteggio di difesa \\
+		crossing & Cross \\
+		finishing & Capacità di finalizzare (segnare un goal) \\
+		heading\_accuracy & Tiro di testa \\
+		short\_passing & Passaggio corto \\
+		volleys & Tiro al volo \\
+		dribbling & Dribbling \\
+		curve & Tiro con effetto curvilineo \\
+		free\_kick\_accuracy & Accuratezza dei calci piazzati \\
+		long\_passing & Passaggio lungo \\
+		ball\_control & Controllo di palla \\
+		acceleration & Accelerazione \\
+		sprint\_speed & Velocità in scatto \\
+		agility & Agilità \\
+		reactions & Reattività \\
+		balance & Equilibrio \\
+		shot\_power & Potenza di tiro \\
+		jumping & Salto \\
+		stamina & Resistenza \\
+		strength & Forza \\
+		long\_shots & Tiri lunghi \\
+		aggression & Aggressività \\
+		interceptions & Intercettazione \\
+		positioning & Posizionamento \\
+		vision & Vista \\
+		penalties & Falli commessi \\
+		marking & Capacità di marcare \\
+		standing\_tackle & Contrasto in piedi \\
+		sliding\_tackle & Scivolata \\
+		gk\_diving & Tuffo (portiere) \\
+		gk\_handling & Presa (portiere) \\
+		gk\_kicking & Rinvio (portiere) \\
+		gk\_positioning & Posizionamento (portiere) \\
+		gk\_reflexes & Riflessi (portiere) \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+
+\subsection{Squadre}
+
+Le squadre sono descritte analogamente ai giocatori tramite 2 tabelle, {\it Team} \ref{tab:team} e {\it TeamAttributes} \ref{tab:team_attr} riportate qui di seguito.
+
+\begin{table}[H]
+	\caption{Team}\label{tab:team_attr}
+	\begin{tabular}{|l|l|l|}
+		\hline
+		Campo & Descrizione \\
+		\hline
+		id & Id del record \\
+		team\_api\_id & Identificativo univoco della sqaudra \\
+		team\_fifa\_api\_id & Id utile per reperire le informazioni da FIFA \\
+		team\_name & Nome completo della squadra \\
+		date & Data di riferimento del record \\
+		buildUpPlaySpeed & Velocità di gioco \\
+		buildUpPlaySpeedClass & Discretizzazione velocità di gioco \\
+		buildUpPlayDribbling & Dribbling \\
+		buildUpPlayDribblingClass & Discretizzazione dribbling \\
+		buildUpPlayPassing & Passaggio \\
+		buildUpPlayPassingClass & Discretizzazione passaggio \\
+		buildUpPlayPositioningClass & Posizionamento della squadra, definito o libero \\
+		chanceCreationPassing & Creazione chance di passaggio \\
+		chanceCreationPassingClass & Discretizzazione creazione chance di passaggio \\
+		chanceCreationCrossing & Creazione chance di cross \\
+		chanceCreationCrossingClass & Discretizzazione creazione chance di cross \\
+		chanceCreationShooting & Creazione chance di tiro in porta \\
+		chanceCreationShootingClass & Discretizzazione creazione chance di tiro in porta \\
+		chanceCreationPositioningClass & Creazione chance di posizionamento \\
+		defencePressure & Pressing della difesa \\
+		defencePressureClass & Discretizzazione pressing della difesa \\
+		defenceAggression & Aggressività della difesa  \\
+		defenceAggressionClass & Discretizzazione aggressività della difesa \\
+		defenceTeamWidth & Copertura della difesa \\
+		defenceTeamWidthClass & Discretizzazione copertura della difesa \\
+		defenceDefenderLineClass & Tipologia di difesa \\
+		\hline
+	\end{tabular}
+\end{table}
+
+Come osservabile, a differenza di quanto avvenga con i giocatori, per le squadre molti attributi appaiono già discretizzati attraverso una suddivisione in classi che descrive a parole la relativa scala da 1 a 100 di ciascun campo.
+
+\begin{table}[H]
 	\caption{Team}\label{tab:team}
+	\centering
 	\begin{tabular}{|l|l|l|}
 		\hline
 		Campo & Descrizione \\
@@ -258,86 +267,175 @@
 		team\_long\_name & Nome completo della squadra \\
 		\hline
 	\end{tabular}
-	\end{table}
+\end{table}
+
+
+
+\subsection{Partite}
+
+La tabella {\it Match} contiene tutte le informazioni relative le squadre che hanno giocato una partita l'una contro l'altra, i giocatori coinvolti e il loro posizionamento in campo. I giocatori vengono numerati da 1 a 11 e il portiere viene sempre collocato in posizione [1;1]. Sono presenti inoltre dei valori il cui scopo è quello di indicare alcune specifiche tecniche sull'andamento della partita. Per brevità e mancanza di documentazione verranno semplicemente omessi, poiché poco rilevanti ai fini dello studio. Nella tabella \ref{tab:match} è presenta la descrizione dei vari campi. 
+
+\begin{table}[H]
+	\caption{Match}\label{tab:match}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		Campo & Descrizione \\
+		\hline
+		id & Id del record \\
+		country\_id & Id della nazione di riferimento \\
+		league\_id & Id della lega di riferimento \\
+		season & Stagione calcistica \\
+		date & Data della partita \\
+		match\_api\_id & Id univoco della partita \\
+		home\_team\_api\_id & Id del team in casa \\
+		away\_team\_api\_id & Id del team in trasferta \\
+		home\_team\_goal & Goal del team in casa \\
+		away\_team\_goal & Goal del team in trasferta \\
+		home\_player\_i & Id dell'i-esimo giocatore in casa \\
+		away\_player\_i & Id dell'i-esimo giocatore in traferta \\
+		home\_player\_Xi & Posizione i-esimo gioc. (casa) sul lato corto del campo \\
+		home\_player\_Yi & Posizione i-esimo gioc. (casa) sul lato lungo del campo \\
+		away\_player\_Xi & Posizione i-esimo gioc. (trasferta) sul lato corto del campo \\
+		away\_player\_Yi & Posizione i-esimo gioc. (trasferta) sul lato lungo del campo \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+
+\clearpage
+
+
+
+\section{Creazione del dataset per le predizioni}
+
+Affinché i dati a disposizione possano essere utilizzati per la predizione del risultato di una partita su base statistica è necessario che vengano elaborati secondo un insieme di regole arbitrariamente scelte e su cui costruire i principi per portare a termine una specifica predizione. L'elaborazione stessa è perciò determinata sia attraverso delle assunzioni volte a identificare gli elementi più rilevanti nei dati, sia tramite l'effettiva esecuzione delle operazioni necessarie a trasformare il dataset originale in quello utilizzato per modellare la Rete Bayesiana.
+
+
+\subsection{Ipotesi e assunzioni}
+
+Al fine di sviluppare il progetto e procedere con la stesura del seguente elaborato, sono state fatte delle assunzioni che fungono da base portante.
+
+Si assume che il risultato di una partita, a sua volta determinato dal numero di goal segnati da una squadra e dall'altra, sia influenzato dalla bravura dei giocatori che partecipano alla partita stessa. Nel gioco del calcio, come in molti altri, esiste una netta suddivisione fra i compiti assegnati a ciascun giocatore che vanno a determinare il ruolo di quest'ultimo: \textbf{portiere}, \textbf{difensore}, \textbf{centrocampista} e \textbf{attaccante}. É chiaro che ogni ruolo riveste la sua particolare importanza e influisce in maniera diversa sull'esito della partita. Per questo progetto, si è pensato di costruire un modello basato proprio sulle potenzialità delle due squadre sfidanti nei diversi ruoli assunti dai giocatori. Poiché tale informazione è mancante all'interno del dataset originale, il primo step cui si è fatto fronte è stata la determinazione dei ruoli di ciascun giocatore in campo. Tale obiettivo è stato raggiunto attraverso l'ipotesi, più che ragionevole, secondo la quale la posizione di una persona sul campo da gioco determina anche il suo ruolo all'interno della squadra e della partita.
+
+In secondo luogo, si è scelto inoltre di supporre che le caratteristiche del team siano determinate solo dai giocatori che ne fanno parte. Non avendo a disposizione inoltre informazioni circa l'appartenenza di un giocatore ad un determinato team nel tempo, non è possibile ottenere una suddivisione dei giocatori in squadre ben formate. Nonostante quest'ultime si potrebbero ricavare direttamente dalle partite svolte, ciò comporterebbe la creazione di dati incoerenti col mondo reale poiché è risaputo che i giocatori di calcio sono soggetti ad un mercato di compra-vendita su base annuale. \\
+Per questo motivo, ai fini della predizione si è scelto di fatto di ignorare l'identità delle due squadre coinvolte in un match, ma semplicemente \textbf{limitarsi a considerare i 22 giocatori che hanno preso parte alla partita}, pesando adeguatamente le abilità che li contraddistinguono nel proprio ruolo.
+
+
+\subsection{Scelta del formato CSV}
+
+Per la creazione del dataset finale, utile per la modellazione della Rete Bayesiana, è stato scelto di trasformare il dataset in formato CSV, in quanto più semplice e pratico da utilizzare rispetto al database relazionale inizialmente fornito. Come si accennava, affinché possa essere creato il modello e su questo condotto delle previsioni, è necessario che i dati vengano elaborati e aggregati in un'unica tabella. Mentre SQLite consente agevolmente di lavorare sulle tabelle per effettuare \textit{join}, selezioni e proiezioni sul modello relazionale, il DBMS non è particolarmente comodo per conservare i dati una volta terminata l'aggregazione. A tale scopo si è preferito quindi esportare successivamente il risultato ottenuto all'interno di un file CSV, decisamente più portabile e immediatamente leggibile rispetto ad un database.
+
+
+\subsection{Aggregazione dei dati}
+
+
+\clearpage
+
+
+
+\section{Rete Bayesiana}
+
+\subsection{Strumenti e librerie}
+
+\subsection{Assunzioni}
+
+\subsection{Generazione della rete}
+
+	\subsubsection{Autogenerazione della struttura}
+
+	\subsubsection{Vincoli introdotti}
+
+	\subsubsection{Esperimenti}
 	
-	\subsection{Partite}
-	
-	La tabella {\it Match} contiene tutte le informazioni relative le squadre che hanno giocato l'una contro l'altra, i giocatori coinvolti e il loro posizionamento in campo. I giocatori vengono numerati da 1 a 11 e il portiere viene sempre collocato in posizione [1;1]. Sono presente inoltre dei valori per indicare le peculiarità della partita che per brevità verranno omessi. Nella tabella \ref{tab:match} è presenta la descrizione dei vari campi. 
-	
-	\begin{table}[H]
-		\caption{Match}\label{tab:match}
-		\begin{tabular}{|l|l|l|}
-			\hline
-			Campo & Descrizione \\
-			\hline
-			id & Id del record \\
-			country\_id & Id della nazione di riferimento \\
-			league\_id & Id della lega di riferimento \\
-			season & Stagione calcistica \\
-			date & Data della partita \\
-			match\_api\_id & Id univoco della partita \\
-			home\_team\_api\_id & Id del team in casa \\
-			away\_team\_api\_id & Id del team in trasferta \\
-			home\_team\_goal & Goal del team in casa \\
-			away\_team\_goal & Goal del team in trasferta \\
-			home\_player\_i & Id dell'i-esimo giocatore in casa \\
-			away\_player\_i & Id dell'i-esimo giocatore in traferta \\
-			home\_player\_Xi & Posizione dell'i-esimo giocatore in casa, sul lato corto del campo \\
-			home\_player\_Yi & Posizione dell'i-esimo giocatore in casa, sul lato lungo del campo \\
-			away\_player\_Xi & Posizione dell'i-esimo giocatore in trasferta, sul lato corto del campo \\
-			away\_player\_Yi & Posizione dell'i-esimo giocatore in trasferta, sul lato lungo del campo \\
-			\hline
-		\end{tabular}
-	\end{table}
-	
-	
-	\clearpage
-	\section{Applicazione web}
-	
-	Al fine di dimostrare l'utilizzo della rete in un applicativo software, viene qui illustrato lo sviluppo e il funzionamento di un'applicazione web che permette la configurazione dei team coinvolti in un match e la conseguente predizione del vincitore.
-	
-	\subsection{Architettura}
-	
-	L'interfaccia web è stata sviluppata utilizzando l'architettura a 3 layer, separando frontend, backend e database.
-	
-	Il database utilizzato risulta quello fornito inizialmente senza alcuna modifica. Esso consiste quindi in un file sqlite interrogabile e modificabile semplicemente tramite un web server. Esso risulta particolarmente utile per fornire i dettagli dei giocatori ed eventualmente dei team così che l'utente possa visualizzarli e sceglierli opportunamente.
-	
-	Per lo sviluppo del backend è stato deciso di utilizzare l'engine javascript tramite il popolare progetto Node.js \cite{site:nodejs}. Esso è in grado di agire come middleware tra il frontend e il database, separando al meglio le logiche di manipolazione del dato. \'E inoltre incaricato di chiamare adeguatamente lo script R per la predizione del vincotore della partita e per svolgere l'inferenza.
-	
-	Il fronted risulta sviluppato utilizzando la libreria javascript React.js \cite{site:react}
-	
-	\subsection{Interfaccia grafica}
-	
-	Di seguito vengono mostrate brevemente le principali schermate dell'applicazione e il loro funzionamento.
-	
-	All'avvio dell'app, utilizzando semplicemente un browser web, è possibile notare la schermata principale con 3 tab di selezione: {\it Home team}, {\it Away team} e {\it Results}. Mentre i primi 2 permettono di modificare le squadre, il terzo consente invece di visualizzare i risultati data la configurazione precedente.
-	
-	% TODO : immagine
-	
-	La schermata di configurazione della squadra mostra sulla sinistra l'immagine di un campo da calcio su cui è possibile spostare i giocatori, semplicemente trascinandoli col mouse e opportunamente aggiunti tramite il pulsante sulla destra, creando così la formazione da utilizzare.
-	
-	% TODO : immagine
-	
-	Una volta finita la configurazione cliccando sul tab dei risultati è possibile vedere in verde la squadra vincitrice e in rosso quella che invece è stata sconfitta.
-	
-	% TODO : immagine
-	
-	Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'applicazione inoltre, nella parte superiore destra dello schermo sono presenti dei tasti per salvare e caricarne di precedenti.
-	
-	% TODO : immagine
-	
-	\subsection{Predizione risultato}
-	
-	Per predire il vincitore della partita, come mostrato precedentemente, è stato necessario utilizzare la rete Bayesiana ottenuta a seguito degli esperimenti. Tale rete è stata infatti salvata su un file che è stato possibile poi ricaricare nell'ambiente R tramite l'apposito comando. Il web server javascript è dunque in grado di chiamare lo script R da riga di comando fornendogli in input una rappresentazione in formato JSON dei giocatori in campo con le loro caratteristiche. Lo script non deve far altro che manipolare i dati che gli sono stati forniti e applicare l'inferenza.
-	
-	Per mostrare inoltre il puro funzionamento della rete è stato sviluppato un semplice form che permette l'inserimento delle evidenze e fornisce in output le distribuzioni di probabilità degli altri nodi.
-	
-	
-	\clearpage
-	\section{Conclusioni}
-	
-	\newpage
-	\bibliographystyle{plain}
-	\bibliography{biblist}
+
+
+
+
+
+\clearpage
+
+
+
+\section{Performance della rete}
+
+\subsection{Tempi}
+
+\subsection{Cross Fold Validation}
+
+\subsubsection{Accuracy}
+
+\subsubsection{Precision e Recall}
+
+\subsubsection{Loss}
+
+
+\clearpage
+
+
+
+\section{Web Demo}
+
+Al fine di dimostrare l'utilizzo della rete in un applicativo software, viene qui illustrato lo sviluppo e il funzionamento di un'applicazione web che permette la configurazione delle rose dei due team coinvolti in una partita e la conseguente predizione del vincitore.
+
+
+
+\subsection{Architettura}
+
+L'interfaccia web è stata sviluppata utilizzando l'architettura a 3 layer, separando frontend, backend e database.
+
+Il database utilizzato risulta quello fornito inizialmente senza alcuna modifica. Esso consiste quindi in un file sqlite interrogabile e modificabile semplicemente tramite un web server. Esso risulta particolarmente utile per fornire i dettagli dei giocatori ed eventualmente dei team così che l'utente possa visualizzarli e sceglierli opportunamente.
+
+Per lo sviluppo del backend è stato deciso di utilizzare l'engine javascript tramite il popolare progetto Node.js \cite{site:nodejs}. Esso è in grado di agire come middleware tra il frontend e il database, separando al meglio le logiche di manipolazione del dato. \'E inoltre incaricato di chiamare adeguatamente lo script R per la predizione del vincotore della partita e per svolgere l'inferenza.
+
+Il fronted risulta sviluppato utilizzando la libreria javascript React.js \cite{site:react}
+
+
+
+\subsection{Interfaccia grafica}
+
+Di seguito vengono mostrate brevemente le principali schermate dell'applicazione e il loro funzionamento.
+
+All'avvio dell'app, utilizzando semplicemente un browser web, è possibile notare la schermata principale con 3 tab di selezione: {\it Home team}, {\it Away team} e {\it Results}. Mentre i primi 2 permettono di modificare le squadre, il terzo consente invece di visualizzare i risultati data la configurazione precedente.
+
+% TODO : immagine
+
+La schermata di configurazione della squadra mostra sulla sinistra l'immagine di un campo da calcio su cui è possibile spostare i giocatori, semplicemente trascinandoli col mouse e opportunamente aggiunti tramite il pulsante sulla destra, creando così la formazione da utilizzare.
+
+% TODO : immagine
+
+Una volta finita la configurazione cliccando sul tab dei risultati è possibile vedere in verde la squadra vincitrice e in rosso quella che invece è stata sconfitta.
+
+% TODO : immagine
+
+Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'applicazione inoltre, nella parte superiore destra dello schermo sono presenti dei tasti per salvare e caricarne di precedenti.
+
+% TODO : immagine
+
+
+
+\subsection{Predizione risultato}
+
+Per predire il vincitore della partita, come mostrato precedentemente, è stato necessario utilizzare la rete Bayesiana ottenuta a seguito degli esperimenti. Tale rete è stata infatti salvata su un file che è stato possibile poi ricaricare nell'ambiente R tramite l'apposito comando. Il web server javascript è dunque in grado di chiamare lo script R da riga di comando fornendogli in input una rappresentazione in formato JSON dei giocatori in campo con le loro caratteristiche. Lo script non deve far altro che manipolare i dati che gli sono stati forniti e applicare l'inferenza.
+
+Per mostrare inoltre il puro funzionamento della rete è stato sviluppato un semplice form che permette l'inserimento delle evidenze e fornisce in output le distribuzioni di probabilità degli altri nodi.
+
+
+
+\clearpage
+
+
+
+\section{Conclusioni}
+
+Lorem ipsum dolor sit amet.
+
+
+
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{biblist}
 	
 \end{document}
