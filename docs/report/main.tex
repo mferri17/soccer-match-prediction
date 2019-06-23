@@ -215,7 +215,7 @@ Nella tabella \ref{tab:player_attr} vengono meglio elencati i campi che descrivo
 Le squadre sono descritte analogamente ai giocatori tramite 2 tabelle, {\it Team} \ref{tab:team} e {\it TeamAttributes} \ref{tab:team_attr} riportate qui di seguito.
 
 \begin{table}[H]
-	\caption{Team}\label{tab:team_attr}
+	\caption{TeamAttributes}\label{tab:team_attr}
 	\begin{tabular}{|l|l|l|}
 		\hline
 		Campo & Descrizione \\
@@ -304,23 +304,42 @@ La tabella {\it Match} contiene tutte le informazioni relative le squadre che ha
 
 
 
+\subsection{Qualche numero}
+\label{sec:dataset-numbers}
+
+Di seguito sono riportati i numeri costituenti il dataset d'origine:
+
+\begin{itemize}
+	\item 25979 partite svoltesi fra il 2010 e il 2016;
+	\item 11060 giocatori in totale;
+	\item 183978 rilevazioni sulle abilità dei giocatori \\ ciò significa approssimativamente 16 rilevazioni per ciascun giocatore;
+	\item 299 squadre di 11 diversi campionati Europei
+	\item 1458 rilevazioni sulle caratteristiche delle squadre \\ ciò significa approssimativamente 5 per ciascun squadra.
+\end{itemize}
+
+
+
+
 \clearpage
 
 
 
 \section{Creazione del dataset per le predizioni}
 
-Affinché i dati a disposizione possano essere utilizzati per la predizione del risultato di una partita su base statistica è necessario che vengano elaborati secondo un insieme di regole arbitrariamente scelte e su cui costruire i principi per portare a termine una specifica predizione. L'elaborazione stessa è perciò determinata sia attraverso delle assunzioni volte a identificare gli elementi più rilevanti nei dati, sia tramite l'effettiva esecuzione delle operazioni necessarie a trasformare il dataset originale in quello utilizzato per modellare la Rete Bayesiana.
+Affinché i dati a disposizione possano essere utilizzati per la predizione del risultato di una partita su base statistica, è necessario che essi vengano prima elaborati secondo un insieme di regole su cui costruire i principi per portare a termine una specifica predizione. L'elaborazione stessa è perciò determinata sia attraverso delle assunzioni volte a identificare gli elementi più rilevanti nei dati, sia tramite l'effettiva esecuzione delle operazioni necessarie a trasformare il dataset originale in quello utilizzato per modellare la Rete Bayesiana.
+
 
 
 \subsection{Ipotesi e assunzioni}
+\label{sec:dataset-hypotesis}
 
 Al fine di sviluppare il progetto e procedere con la stesura del seguente elaborato, sono state fatte delle assunzioni che fungono da base portante.
 
 Si assume che il risultato di una partita, a sua volta determinato dal numero di goal segnati da una squadra e dall'altra, sia influenzato dalla bravura dei giocatori che partecipano alla partita stessa. Nel gioco del calcio, come in molti altri, esiste una netta suddivisione fra i compiti assegnati a ciascun giocatore che vanno a determinare il ruolo di quest'ultimo: \textbf{portiere}, \textbf{difensore}, \textbf{centrocampista} e \textbf{attaccante}. É chiaro che ogni ruolo riveste la sua particolare importanza e influisce in maniera diversa sull'esito della partita. Per questo progetto, si è pensato di costruire un modello basato proprio sulle potenzialità delle due squadre sfidanti nei diversi ruoli assunti dai giocatori. Poiché tale informazione è mancante all'interno del dataset originale, il primo step cui si è fatto fronte è stata la determinazione dei ruoli di ciascun giocatore in campo. Tale obiettivo è stato raggiunto attraverso l'ipotesi, più che ragionevole, secondo la quale la posizione di una persona sul campo da gioco determina anche il suo ruolo all'interno della squadra e della partita.
 
-In secondo luogo, si è scelto inoltre di supporre che le caratteristiche del team siano determinate solo dai giocatori che ne fanno parte. Non avendo a disposizione inoltre informazioni circa l'appartenenza di un giocatore ad un determinato team nel tempo, non è possibile ottenere una suddivisione dei giocatori in squadre ben formate. Nonostante quest'ultime si potrebbero ricavare direttamente dalle partite svolte, ciò comporterebbe la creazione di dati incoerenti col mondo reale poiché è risaputo che i giocatori di calcio sono soggetti ad un mercato di compra-vendita su base annuale. \\
+In secondo luogo, si è scelto inoltre di supporre che le caratteristiche del team siano determinate solo dai giocatori che ne fanno parte. Non avendo a disposizione informazioni circa l'appartenenza di un giocatore ad un determinato team nel tempo, non è possibile ottenere una suddivisione dei giocatori in squadre ben formate. Nonostante quest'ultime si potrebbero ricavare direttamente dalle partite svolte, ciò comporterebbe la creazione di dati incoerenti col mondo reale poiché i giocatori di calcio sono soggetti ad un mercato di compra-vendita su base annuale. \\
 Per questo motivo, ai fini della predizione si è scelto di fatto di ignorare l'identità delle due squadre coinvolte in un match, ma semplicemente \textbf{limitarsi a considerare i 22 giocatori che hanno preso parte alla partita}, pesando adeguatamente le abilità che li contraddistinguono nel proprio ruolo.
+
 
 
 \subsection{Scelta del formato CSV}
@@ -328,7 +347,162 @@ Per questo motivo, ai fini della predizione si è scelto di fatto di ignorare l'
 Per la creazione del dataset finale, utile per la modellazione della Rete Bayesiana, è stato scelto di trasformare il dataset in formato CSV, in quanto più semplice e pratico da utilizzare rispetto al database relazionale inizialmente fornito. Come si accennava, affinché possa essere creato il modello e su questo condotto delle previsioni, è necessario che i dati vengano elaborati e aggregati in un'unica tabella. Mentre SQLite consente agevolmente di lavorare sulle tabelle per effettuare \textit{join}, selezioni e proiezioni sul modello relazionale, il DBMS non è particolarmente comodo per conservare i dati una volta terminata l'aggregazione. A tale scopo si è preferito quindi esportare successivamente il risultato ottenuto all'interno di un file CSV, decisamente più portabile e immediatamente leggibile rispetto ad un database.
 
 
-\subsection{Aggregazione dei dati}
+
+\subsection{Elaborazione dei dati}
+\label{sec:dataset-elab}
+
+Avendo come principale fonte d'informazione i dati relativi alle partite calcistiche svoltesi in Europa fra il 2010 e il 2016, e sapendo per ciascuna di essa i giocatori partecipanti (con relative posizioni in campo) e l'esito del match, è chiaro che la priorità durante la fase di elaborazione dei dati è stata quella di unire tutte le informazioni a disposizione in un'unica tabella. Ciò è stato possibile attraverso il \textit{join} delle tabelle \textit{Match} e \textit{PlayerAttributes} utilizzando le chiavi che le mettono in relazione. Successivamente, i dati sono stati aggregati per computare la competitività di una certa squadra in una specifica partita.
+
+
+\subsubsection{Reperimento delle informazioni sui giocatori di una partita}
+
+Per ogni partita si hanno a disposizione 22 chiavi esterne, relative ai giocatori della squadra di casa e di quella ospite; con queste, è stato possibile reperire per ciascun giocatore le proprie abilità in quel determinato momento temporale. Tale informazione è reperibile nella tabella \textit{PlayerAttributes}, nella quale per la medesima persona sono contenute più rilevazioni, con date differenti. Chiaramente, la rilevazione corretta delle abilità di un certo giocatore è rappresentata da quella più recente, purché questa sia stata effettuata precedentemente alla data del match in esame.
+
+Per fare un esempio pratico, se in una partita del 3/07/2016 ha partecipato il giocatore con \texttt{id 1234} e supponendo che in \textit{PlayerAttributes} si trovino, per tale giocatore, i dati che è possibile osservare nella tabella \ref{tab:player_attr_example}, è chiaro che il dato corretto da associare a tale partita per il giocatore \texttt{1234} è quello datato 12/12/2015. Questo rappresenta l'informazione più aggiornata alla data della partita.
+
+\begin{table}[H]
+	\caption{PlayerAttributes WHERE Id = 1234}\label{tab:player_attr_example}
+	\centering
+	\begin{tabular}{|l|l|l|l|l|l|l|}
+		\hline
+		Id & Name & Date & Overall & Finishing & Marking & ... \\
+		\hline
+		1234 & Gabriel Marquez & 12/04/2018 & 78 & 72 & 85 & ... \\
+		1234 & Gabriel Marquez & 12/12/2015 & 80 & 75 & 82 & ... \\
+		1234 & Gabriel Marquez & 05/10/2013 & 75 & 70 & 80 & ... \\
+		\hline
+	\end{tabular}
+\end{table}
+
+L'operazione di \textit{join} da eseguire per ciascuna partita ha dovuto coinvolgere ben 22 giocatori, di cui per ognuno è stato necessario scegliere la riga corretta di \textit{PlayerAttributes}, adeguatamente filtrata per data. É da ricordare, come accennato nel capitolo \ref{sec:dataset-numbers}, che per ciascun giocatore si registrano mediamente 16 rilevazioni in date diverse all'interno della tabella \textit{PlayerAttributes}.
+
+Il primo tentativo di effettuare il join è quindi fallito. \\
+Tentando di reperire tutte le informazioni necessarie attraverso l'esecuzione di un'unica query SQL ci si è accorti che, in questo specifico caso d'uso, 22 join fossero decisamente troppi; questo poiché per ciascuna colonna di \textit{Match} da \textit{joinare} (ognuna delle quali rappresenta la chiave esterna di un giocatore) era necessario computare il prodotto cartesiano fra ciascun match e mediamente 16 record di \textit{PlayerAttributes}. La query, il cui codice è semplificato qui sotto, produceva quindi una crescita di righe esponenziale fra un \textit{join} e il successivo, che rappresenta tutt'oggi un requisito computazionalmente impossibile da gestire per tabelle di grosse dimensioni.
+
+\begin{verbatim}
+SELECT *
+FROM Match as m
+JOIN Player_Attributes as h1 
+	on h1.player_api_id = match.home_player_1 AND h1.date < m.date
+JOIN Player_Attributes as h2 
+	on h2.player_api_id = match.home_player_2 AND h2.date < m.date
+...
+GROUP BY m.match_api_id
+HAVING h1.date = MAX(h1.date)
+HAVING h2.date = MAX(h2.date)
+...
+\end{verbatim}
+
+Per ovviare il problema, si è quindi pensato di svolgere un'operazione di \textit{join} alla volta, salvando di volta in volta il risultato in tabelle intermedie per i 22 giocatori. Ciò è stato possibile attraverso lo sviluppo di un programma Javascript per la creazione incrementale delle query e l'interfacciamento diretto con il database SQLite. L'approccio si è rivelato vincente, facendo abbassare in maniera drasticamente i tempi di esecuzione da diverse ore a poche decine di secondi.
+
+
+\subsubsection{Ruolo di un giocatore}
+
+La tabella risultante dallo step precedente, contenente per ogni partita i dati di ciascun giocatore coinvolto, ne è risultata di circa 17mila record dai 25mila iniziali, a causa di alcuni dati mancanti proprio relativamente ai giocatori partecipanti. A questo punto si è quindi scelto di elaborare proprio le caratteristiche dei giocatori per costruire il dataset da utilizzare per le predizioni.
+
+Come accennato nella sezione \ref{sec:dataset-hypotesis}, si è assunto che la potenzialità di vittoria di una certa squadra sia da ricondurre alle caratteristiche della squadra stessa nei diversi ruoli assunti dai giocatori a seconda della loro posizione sul campo da gioco. Tale problema è stato affrontato utilizzando le 44 colonne della tabella \textit{Match} rappresentanti le coordinate \texttt{X} e \texttt{Y} di ciascuno dei 22 giocatori in campo.
+
+In particolare, considerando il campo da calcio come un piano e rivolgendosi con le spalle alla porta, si è potuto evincere che le \texttt{X} rappresentassero la posizione di un giocatore rispetto al lato corto del campo (quindi a destra o sinistra rispetto al portiere), mentre le \texttt{Y} fossero rappresentative della distanza fra il portiere e il giocatore considerato, quindi la posizione di quest'ultimo rispetto al lato lungo del campo. Proprio questa coordinata, sopratutto grazie ad una conoscenza pregressa del dominio di riferimento, si è rivelata essenziale per determinare i ruoli di ciascun giocatore durante il corso di una partita.
+
+Attraverso una scelta empirica e il confronto fra distribuzioni del numero di giocatori nei diversi ruoli, sono state fatte le seguenti assunzioni:
+
+\begin{itemize}
+	\item La \texttt{Y} pari a 1 è sempre occupata dal portiere;
+	\item Le \texttt{Y} da 2 a 4 costituiscono i difensori;
+	\item Le \texttt{Y} da 5 a 8 sono costituenti dei centrocampisti;
+	\item Le \texttt{Y} da 9 a 11 rappresentano gli attaccanti.
+\end{itemize}
+
+Tale assunzione è totalmente plausibile considerata la tipica formazione di una squadra da calcio ed ha portato all'assegnamento di uno dei 4 ruoli disponibili a ciascun giocatore in partita. Nella figura \ref{fig:dataset-roles-distr} è possibile quindi osservare la distribuzione assunta dal numero di giocatori per ciascun ruolo nelle varie partite presenti nel dataset. \\
+Mentre i difensori sono quasi sempre quattro, gli attaccanti sono fra uno e tre per partita mentre i centrocampisti possono essere da tre a cinque.
+
+\vspace{2ex}
+
+Le analisi e le elaborazioni sui dati presentate nel seguito di questo capitolo sono state ottenute tutte attraverso l'utilizzo del linguaggio di programmazione R.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{images/04_01_roles_distribution.png}
+	\caption[Distribuzione dei ruoli nelle partite]{Distribuzione dei ruoli nelle partite}
+	\label{fig:dataset-roles-distr}
+\end{figure}
+
+
+\subsubsection{Potenzialità di una squadra in partita}
+
+Se in \textit{PlayerAttributes} (le cui colonne sono meglio descritte nella tabella \ref{tab:player_attr}) vengono espresse quasi 40 diverse abilità tipiche dei giocatori di calcio, non tutte sono essenziali per ciascun ruolo. Si trovano ad esempio \texttt{finishing} e \texttt{shot\_power} come caratteristiche degli attaccanti oppure \texttt{marking} e \texttt{standing\_tackle} per i difensori, e ancora altri attributi espressamente dedicati ai portieri.
+
+In questo contesto, si è pensato di computare per ciascuna partita e squadra partecipante diversi punteggi per esprimere la potenza di una certa squadra, sulla base dei 4 ruoli disponibili nel calcio: \textbf{portiere}, \textbf{difesa}, \textbf{centrocampo} e \textbf{attacco}. Tali punteggi costituiranno in seguito i nodi della Rete Bayesiana su cui fare le dovute predizioni; si è deciso di calcolarli sfruttando i valori registrati dai giocatori che costituiscono i 4 ruoli della squadra durante una partita.
+
+\vspace{3ex}
+
+Inizialmente, si era pensato di assegnare a ciascun giocatore della partita un determinato punteggio calcolato attraverso una media pesata delle abilità più rilevanti per il ruolo che si sta giocando. Questo avrebbe comportato la necessità di aggregare per ciascun giocatore diverse abilità a seconda del suo ruolo in partita, per successivamente andare a costituire un'ulteriore aggregazione di tutti i giocatori in una certa posizione al fine di computare le potenzialità della squadra, per ciascun ruolo, durante la partita. 
+
+Seppur il calcolo sia logicamente sensato, conoscendo il dominio si è tuttavia ragionato sul fatto che ciascun giocatore del calcio moderno è sempre intrinsecamente legato ad un ruolo, che assume in tutte le partite da egli giocate. Seguendo questo ragionamento si è conseguentemente provato a verificare l'attendibilità del punteggio \texttt{overall\_rating}, già espresso all'interno del dataset per ciascun giocatore, che dovrebbe rappresentare il punteggio generale del giocatore con particolare attenzione al proprio ruolo. 
+
+É stata pertanto condotta un'analisi di correlazione fra \texttt{overall\_rating} e gli altri attributi di \textit{PlayerAttribute} per dimostrare che il primo fosse in grado di adattarsi efficacemente al tipico ruolo del giocatore considerato. Tale analisi, presentata nella sezione successiva, ha chiaramente evidenziato che l'attributo \texttt{overall\_rating} della tabella \textit{PlayerAttribute} è sufficiente a descrivere efficaciemente un giocatore, pertanto si è scelto di utilizzare questa colonna come unica caratteristica per costituire i punteggi aggregati di difesa, centrocampo e attacco. 
+
+
+\subsubsection{Correlazione fra ruolo e \texttt{overall\_rating}}
+
+Per analizzare la correlazione fra ruolo di un giocatore e \texttt{overall\_rating}, al fine di comprendere se quest'ultimo sia adatto a descrivere efficamente un giocatore, si è innanzitutto tentato di suddividere i giocatori in ruoli, sulla base dei valori assunti in determinate abilità e studiando la distribuzione dei valori assunti da quest'ultime.
+
+Facendo riferimento a \texttt{gk\_diving} e la figura \ref{img:dataset-gkdiving-distr}, si è facilmente evidenziata una distribuzione nettamente suddivisa fra valori sopra 50 (su una scala di 100) e sotto 40, a scindere inequivocabilmente i giocatori portieri da tutti gli altri. Per questi, è chiaramente evidente in figura \ref{img:dataset-gk-corr} che \texttt{overall\_rating} sia totalmente dipendente dalle abilità legate al portiere e dalla capacità di reagire rapidamente.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{images/04_02_gkdiving_distribution.png}
+	\caption[Distribuzione di \texttt{gk\_diving}]{Distribuzione di \texttt{gk\_diving}}
+	\label{img:dataset-gkdiving-distr}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{images/04_03_gk_corr.png}
+	\caption[Correlazione fra \texttt{overall\_rating} (prima riga dal basso) e le abilità di un portiere (a destra)]{Correlazione fra \texttt{overall\_rating} (prima riga dal basso) e le abilità di un portiere (a destra)}
+	\label{img:dataset-gk-corr}
+\end{figure}
+
+Studiando invece la correlazione fra le diverse abilità, si è evinto che due fra gli attributi meno correlati fra loro fossero \texttt{marking} e \texttt{finishing}, associati rispettivamente al ruolo difensivo e quello d'attacco. Sfruttando l'incorrelazione di -0.62 qui mostrata, si è quindi potuto sfruttare i due campi per scindere il dataset dei giocatori in attaccanti e difensori, per studiarne il comportamento di \texttt{overall\_rating}.
+
+\begin{verbatim}
+cor(PlayerAttributes[PlayerAttributes$gk_diving <= 40, ]$marking,
+PlayerAttributes[PlayerAttributes$gk_diving <= 40, ]$finishing,
+use ="pairwise.complete.obs"); 		RESULT = -0.6204823
+\end{verbatim}
+
+In figura \ref{img:dataset-def-corr} è possibile osservare la matrice di correlazione applicata sui difensori, cioè i giocatori non-portieri con un punteggio minimo di 50 su \texttt{marking} e massimo di 50 su \texttt{finishing}. Si evince come la maggior parte della correlazione di \texttt{overall\_rating} (prima riga dal basso) la si ottenga con le abilità tipiche della difesa come \texttt{marking}, \texttt{sliding\_tackle} e \texttt{interceptions}. Le abilità del portiere sono totalmente ininfluenti ed in generale anche le caratteristiche d'attacco non sono molto rilevanti.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{images/04_04_def_corr.png}
+	\caption[Correlazione fra \texttt{overall\_rating} (prima riga dal basso) e le abilità di un difensore]{Correlazione fra \texttt{overall\_rating} (prima riga dal basso) e le abilità di un difensore}
+	\label{img:dataset-def-corr}
+\end{figure}
+
+Infine, nella figura \ref{img:dataset-atk-corr} viene presentata la correlazione fra \texttt{overall\_rating} e le abilità di un attaccante, cioè un giocatore non-portiere con un punteggio massimo di 50 su \texttt{marking} e minimo di 50 su \texttt{finishing}. Questa volta si nota che le abilità difensive non hanno alcuna influenza sul punteggio globale, a differenza di quanto avvenga invece per le abilità più legate ai tiri in porta, al dribbling e alla velocità di corsa, che erano decisamente meno influenti per i difensori.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{images/04_05_atk_corr.png}
+	\caption[Correlazione fra \texttt{overall\_rating} (prima riga dal basso) e le abilità di un attaccante]{Correlazione fra \texttt{overall\_rating} (prima riga dal basso) e le abilità di un attaccante}
+	\label{img:dataset-atk-corr}
+\end{figure}
+
+
+\clearpage
+\subsubsection{Calcolo e discretizzazione dei punteggi generali per la squadra}
+
+Tramite le precedenti considerazioni si è dimostrato che è possibile utilizzare il solo attributo \texttt{overall\_rating} per descrivere efficaciemente un giocatore. Per calcolare quindi i punteggi ottenuti da una certa squadra, composta dagli 11 giocatori, in una certa partita si è quindi pensato di mediare fra loro gli \texttt{overall\_rating} dei giocaori facenti parte dei 4 diversi ruoli del calcio.
+
+Così facendo si sono ottenuti 4 valori continui, da 1 a 100, rappresentanti le caratteristiche generali della squadra sulla base dei giocatori coinvolti nella partita. Successivamente verrà dimostrato che, per il caso in esame, considerare anche il numero di giocatori in un determinato ruolo è ininfluente.
+
+Al fine di sottoporre queste informazioni ad una Rete Bayesiana, si è quindi proceduto con una discretizzazione dei valori. Inizialmente, si è scelto di utilizzare 4 intervalli di discretizzazione; più avanti in questo elaborato si mostrerà come questa scelta possa avere un'influenza sulle performance del modello di predizione.
+
+\vspace{5ex}
+
+I dati ottenuti sono stati ripuliti delle informazioni non più rilevanti, come i dati sui singoli giocatori, e quindi esportati in formato CSV per essere sottoposti alla Rete Bayesiana con lo scopo di fare previsioni sul risultato di una partita e inferenze di diverso genere sui possibili valori assunti dai 4 punteggi per ciascuna squadra.
+
 
 
 \clearpage
@@ -337,7 +511,16 @@ Per la creazione del dataset finale, utile per la modellazione della Rete Bayesi
 
 \section{Rete Bayesiana}
 
-\subsection{Strumenti e librerie}
+Lo scopo di questo progetto è la predizione del risultato di una partita di calcio. Sfruttando i dati ottenuti dal dataset d'origine attraverso l'elaborazione esplicata nel dettaglio alla sezione \ref{sec:dataset-elab}, è possibile costruire un modello di apprendimento che utilizzi le caratteristiche tecniche delle due squadre in competizione per predire, su base statistica, chi sarà il vincitore.
+
+A questo scopo di è scelto di utilizzare una Rete Bayesiana, un modello grafico probabilistico che rappresenta un insieme di variabili stocastiche con le loro dipendenze condizionali attraverso l'uso di un grafo aciclico diretto (DAG). Nel caso in esame, le variabili stocastiche sono rappresentate proprio dai punteggi assunti dalla squadra in casa e quella in trasferta nei 4 ruoli tipici del calcio. 
+
+In questo capitolo vi si farà riferimento con la seguente nomenclatura: \\
+\texttt{HOME\_GK}, \texttt{HOME\_DEF}, \texttt{HOME\_MID} e \texttt{HOME\_ATK} per la squadra che gioca in casa e \\
+\texttt{AWAY\_GK}, \texttt{AWAY\_DEF}, \texttt{AWAY\_MID} e \texttt{AWAY\_ATK} per la squadra ospite.
+
+
+\subsection{Software utilizzato}
 
 \subsection{Assunzioni}
 
@@ -345,7 +528,7 @@ Per la creazione del dataset finale, utile per la modellazione della Rete Bayesi
 
 	\subsubsection{Autogenerazione della struttura}
 
-	\subsubsection{Vincoli introdotti}
+	\subsubsection{Vincoli}
 
 	\subsubsection{Esperimenti}
 	

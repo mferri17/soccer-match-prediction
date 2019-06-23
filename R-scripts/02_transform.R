@@ -197,6 +197,14 @@ for (type in c("home", "away")) {
   # }
 }
 
+discr$home_goals = NULL;
+discr$away_goals = NULL;
+discr$id = NULL;
+discr$league_id = NULL;
+discr$away_def_count = NULL;
+discr$away_mid_count = NULL;
+discr$away_atk_count = NULL;
+
 plot_bar(discr);
 plot_histogram(discr);
 
