@@ -20,12 +20,12 @@ event = paste("(", row[1,"query_name"], " == '",
 row$query_name = NULL;
 row$query_value = NULL;
 
-evidence = paste("(", colnames(row), " == '",
-                 sapply(row[1, ], as.character), "')",
-                 sep = "", collapse = " & ");
+evidence = paste(colnames(row), " = '",
+                 sapply(row[1, ], as.character), "'",
+                 sep = "", collapse = ", ");
 
 # compute result
-cmd = paste("cpquery(bn, ", event, ", ", evidence, ")", sep = "");
+cmd = paste("cpquery(bn, ", event, ", list(", evidence, "), method = 'lw')", sep = "");
 res = eval(parse(text = cmd));
 
 # serve result to cmd

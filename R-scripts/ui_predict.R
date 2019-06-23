@@ -72,12 +72,12 @@ event = sprintf("(winner == '%s')", row[1, "winner"]);
 
 row$winner = NULL;
 
-evidence = paste("(", colnames(row), " == '",
-                 sapply(row[1, ], as.character), "')",
-                 sep = "", collapse = " & ");
+evidence = paste(colnames(row), " = '",
+                 sapply(row[1, ], as.character), "'",
+                 sep = "", collapse = ", ");
 
 # compute result
-cmd = paste("cpquery(bn, ", event, ", ", evidence, ")", sep = "");
+cmd = paste("cpquery(bn, ", event, ", list(", evidence, "), method = 'lw')", sep = "");
 res = eval(parse(text = cmd));
 
 # serve result to cmd

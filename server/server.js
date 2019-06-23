@@ -13,6 +13,8 @@ const dbDir = path.join(__dirname, '..', 'dataset');
 const dbFile = path.join(dbDir, 'database.sqlite');
 const connectDb = () => new sqlite3.Database(dbFile);
 
+const toFixed2 = n => Math.round(n * 100) / 100;
+
 const app = express();
 app.use(bodyParser.urlencoded({
   extended: false
@@ -84,7 +86,7 @@ app.post('/predict', (req, res) => {
     } else {
       const out = stdout.split(/\r?\n/);
       const perc = Number(out[out.length - 1]);
-      res.json([perc, Math.round((1 - perc) * 100) / 100]);
+      res.json([toFixed2(perc), toFixed2(1 - perc)]);
     }
   });
 });
