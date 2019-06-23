@@ -18,7 +18,7 @@ setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
 dfull2 = read.csv("dataset.csv", header = TRUE);
 
-## redicing to binary problem
+## reducing to binary problem
 dfull2$winner = factor(ifelse(dfull2$winner == "home", "home", "not home"));
 
 dfull2$id = NULL;

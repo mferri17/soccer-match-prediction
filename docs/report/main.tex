@@ -273,7 +273,7 @@ Come osservabile, a differenza di quanto avvenga con i giocatori, per le squadre
 
 \subsection{Partite}
 
-La tabella {\it Match} contiene tutte le informazioni relative le squadre che hanno giocato una partita l'una contro l'altra, i giocatori coinvolti e il loro posizionamento in campo. I giocatori vengono numerati da 1 a 11 e il portiere viene sempre collocato in posizione [1;1]. Sono presenti inoltre dei valori il cui scopo è quello di indicare alcune specifiche tecniche sull'andamento della partita. Per brevità e mancanza di documentazione verranno semplicemente omessi, poiché poco rilevanti ai fini dello studio. Nella tabella \ref{tab:match} è presenta la descrizione dei vari campi. 
+La tabella {\it Match} contiene tutte le informazioni relative alle squadre che hanno giocato una partita l'una contro l'altra, i giocatori coinvolti e il loro posizionamento in campo. I giocatori vengono numerati da 1 a 11 e il portiere viene sempre collocato in posizione [1,1]. Sono presenti inoltre dei valori il cui scopo è quello di indicare alcune specifiche tecniche sull'andamento della partita. Per brevità e mancanza di documentazione verranno semplicemente omessi, poiché poco rilevanti ai fini dello studio. Nella tabella \ref{tab:match} è presentata la descrizione dei vari campi. 
 
 \begin{table}[H]
 	\caption{Match}\label{tab:match}
@@ -518,19 +518,113 @@ A questo scopo di è scelto di utilizzare una Rete Bayesiana, un modello grafico
 In questo capitolo vi si farà riferimento con la seguente nomenclatura: \\
 \texttt{HOME\_GK}, \texttt{HOME\_DEF}, \texttt{HOME\_MID} e \texttt{HOME\_ATK} per la squadra che gioca in casa e \\
 \texttt{AWAY\_GK}, \texttt{AWAY\_DEF}, \texttt{AWAY\_MID} e \texttt{AWAY\_ATK} per la squadra ospite.
+La variabile target, cioè quella da predire, verrà invece identificata come \texttt{WINNER}.
 
 
-\subsection{Software utilizzato}
 
 \subsection{Assunzioni}
+\label{sec:bn-assumptions}
 
-\subsection{Generazione della rete}
+La principale assunzione su cui si basa l'intero lavoro di modellazione con le Reti Bayesiane è costituito dal fatto che le due squadre che si sfidano in una partita sono fra loro causalmente indipendenti. Ciò significa che le variabili stocastiche della squadra in casa, e quindi i nodi che compongono la Rete Bayesiana, non devono poter essere raggiungibili attraverso un cammino orientato da parte dei nodi costituenti la squadra in trasferta, e viceversa.
 
-	\subsubsection{Autogenerazione della struttura}
+In altre parole, se ciascuna squadra è rappresentata da un arbitrario numero di nodi, questi costituiranno una sorta di componente connessa che interagirà con le altre solamente attraverso dei nodi intermedi con soli archi entranti. Il risultato della partita è un tipico nodo di collegamento fra le due squadre, i cui punteggi che le caratterizzano nei diversi ruoli non si influenzano fra una squadra l'altra.
 
-	\subsubsection{Vincoli}
 
-	\subsubsection{Esperimenti}
+
+\subsection{Software}
+
+Il linguaggio di programmazione utilizzato per la modellazione della Rete Bayesiana su cui effettuare le predizioni è R\cite{site:r}, un ambiente software gratuito per computazione di natura statistica. Più nello specifico, la libreria utilizzata per lo scopo del progetto è \texttt{bnlearn}\cite{site:bnlearn}, pensata proprio per lavorare con modelli di apprendimento basati sulle Reti Bayesiane.
+
+\texttt{bnlearn} mette a disposizione una moltitudine di istruzioni sia per strutturare la Rete che per svolgere predizioni e inferenze di qualsiasi tipo. Fra le funzionalità più vantaggiose, la libreria è in grado di generare anche la struttura fisica della rete basandosi sui dati conosciuti e vantando la capacità di sfruttare più che una decina di algoritmi di apprendimento della struttura. Inoltre, \texttt{bnlearn} è in grado di lavorare anche con dataset continui. 
+
+La libreria è il principale punto di riferimento per l'utilizzo delle Reti Bayesiane in R ed è stata creata da Marco Scutari, italiano specialista del settore oggi occupato all'Istituto Dalle Molle di Studi sull'Intelligenza Artificiale di Lugano.
+
+\vspace{3ex}
+
+Altre librerie utilizzate durante lo sviluppo ed in particolare per la fase di pre-analisi ed elaborazione descritta nel precedente capitolo sono \texttt{DataExplorer}, \texttt{arules} e \texttt{caret} per la visualizzazione e lavorazione dei dati.
+
+
+
+\subsection{Creazione della rete}
+
+Come precedentemente accennato, con \texttt{bnlearn} è possibile modellare una Rete Bayesiana sia progettandola in autonomia che facendola generare automaticamente alla libreria con la possibilità di sfruttare una moltitudine di approcci diversi.
+
+Gli step per la progrettazione di una Rete sono in primis la modellazione della sua struttura e poi la specifica dei parametri, ossia delle probabilità condizionate di ciascun nodo (CPT). Una peculiarità delle Reti Bayesiane, se confrontate ad altri modelli con cui è possibile fare Machine Learning, è quella di essere completamente visibile agli occhi del programmatore e soprattutto semanticamente significativa, specie per quanto riguarda il DAG rappresentante la struttura della rete stessa. \'E importante che il grafo della Rete non sia particolarmente complesso, sia per facilitarne la lettura che per evitare un peggioramento delle performance incontrollato.
+
+
+\subsubsection{Autogenerazione della struttura}
+
+Nel caso in esame, si è deciso di sfruttare in primis una rete auto generata dai dati a disposizione. Ciò ha il vantaggio di essere immediatamente funzionante e tendenzialmente cablata per avere delle prestazioni quasi ottimali. La generazione delle struttura avviene tramite un approccio data-driven, sfruttando il dataset su cui si vuole fare predizioni e inferenze. All'approccio numerico basato sui dati, segue spesso un \textit{tuning} effettuato sulla conoscenza del dominio di riferimento, come possono essere ad esempio determinate assunzioni fatte a priori.
+
+\texttt{bnlearn} mette a disposizione del programmatore svariati metodi per l'apprendimento della struttura della Rete: \textit{constraint-based}, \textit{score-based} e \textit{hybrid}. Partendo da una condizione iniziale di indecisione relativo al metodo migliore da utilizzare per il progetto in esame, si è scelto di utilizzare un approccio empirico basato sulla sperimentazione. Provando svariati algoritmi, si è notato che molti di questi lasciavano all'interno della rete dei nodi completamente isolati, motivo per cui sono stati scartati a priori.
+
+Fra i metodi che sono sembrati più "corretti" nella generazione della Rete è emerso \textit{hill-climbing} (HC), un algoritmo \textit{score-based} di ricerca greedy che parte da una condizione di rete senza archi, a cui vengono progressivamente aggiunti, rimossi o invertiti fino alla generazione di una rete che non riesce a ottenere un punteggio migliore. Quest'ultimo è calcolato attraverso una funzione di ottimizzazione applicata alla rete stessa ed utilizzata per apprendere la struttura sub-ottimale\cite{thesis:bnlearn-marco}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1]{images/05_00_hc_algo.png}
+	\caption[Algoritmo Hill Climbing per l'apprendimento della struttura di una BN]{Algoritmo Hill Climbing per l'apprendimento della struttura di una BN}
+	\label{img:hc-algorithm}
+\end{figure}
+
+Il codice per la generazione e visualizzazione della struttura della Rete Bayesiana con \texttt{bnlearn} è decisamente semplice, e porta al risultato mostrato nella figura \ref{img:hc-pure}:
+
+\begin{verbatim}
+dag = hc(dataset);
+plot(dag);
+\end{verbatim}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.75]{images/05_01_hc_pure.png}
+	\caption[Rete autogenerata con algoritmo HC]{Rete autogenerata con algoritmo HC}
+	\label{img:hc-pure}
+\end{figure}
+
+Nonostante la rete generata (figura \ref{img:hc-pure}) appaia semplice e piuttosto sensata, è doveroso far notare che alcuni archi contraddicono le assunzioni fatte nella sezione \ref{sec:bn-assumptions} per cui è stato detto che le due squadre in competizione devono essere composte da nodi causalmente indipendenti. Come si vede nell'immagine, \texttt{HOME\_MID} ha un arco entrante in \texttt{AWAY\_DEF} e come se non bastasse anche \texttt{WINNER}, la variabile target, va a finire dentro il medesimo nodo. Per questo motivo, si è dimostrato necessario introdurre un intervento manuale per la generazione della rete.
+
+Sfruttando un parametro chiamato \texttt{blacklist}, è stata fornita alla funzione \texttt{hc} una lista di archi da \textbf{non} includere nella rete. Così facendo è stato possibile impedire alle due squadre di collegarsi fra loro. \\
+Di seguito viene mostrato il codice che genera la rete in figura \ref{img:hc-bl}.
+
+\begin{verbatim}
+home_attr = c("home_gk", "home_def", "home_mid", "home_atk");
+away_attr = c("away_gk", "away_def", "away_mid", "away_atk");
+bl = rbind(
+as.matrix(expand.grid(home_attr, away_attr)),
+as.matrix(expand.grid(away_attr, home_attr))
+dag = hc(dfull1, blacklist = bl);
+\end{verbatim}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{images/05_02_hc_bl.png}
+	\caption[Rete autogenerata con algoritmo HC e blacklist per evitare che le due squadre si connettessero fra loro]{Rete autogenerata con algoritmo HC e blacklist per evitare che le due squadre si connettessero fra loro}
+	\label{img:hc-bl}
+\end{figure}
+
+Questa volta, le due squadre sono causalmente indipendenti e quindi le assunzioni sono rispettate. Inoltre, è possibile notare che solamente uno dei nodi di entrambe le squadre va a costituire una dipendenza causale diretta con la variabile target, cioè \texttt{HOME\_MID} e \texttt{AWAY\_DEF}. Non vi è una vera e propria spiegazione semantica a questo fenomeno, ma intuitivamente si potrebbe pensare che mentre una squadra, quella in casa, punti con questa rete a massimizzare le proprie capacità di possesso palla e attacco (con il centrocampo), l'altra sia prevalentemente interessata a difendersi.
+
+Questo tipo di comportamento è sicuramente originato dal dataset a disposizione, probabilmente anche a causa del fatto che la distribuzione della variabile \texttt{WINNER} è mal condizionata: circa nel 50\% dei casi vince la squadra in casa, mentre solamente il 25\% delle partite è vinta da quella in trasferta, con la rimanente porzione di pareggi.
+
+Quest'ultima intuizione potrebbe essere confermata dal fatto che, riducento il problema ternario \texttt{WINNER}=\textit{home/away/draw} ad un problema binario \texttt{WINNER}=\textit{home/not home}, la rete cambia nuovamente e questa volta sono entrambi i centrocampi ad influenzare direttamente il target. Lo si può vedere in figura \ref{img:hc-bin-bl}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{images/05_02_hc_bin_bl.png}
+	\caption[Rete autogenerata con algoritmo HC e blacklist sul problema binario]{Rete autogenerata con algoritmo HC e blacklist sul problema binarios}
+	\label{img:hc-bin-bl}
+\end{figure}
+
+Si vedranno più avanti in questo elaborato le implicazioni sulle performance derivate dalla considerazione di un problema binario piuttosto che ternario, o viceversa.
+
+
+\subsubsection{Generazione delle CPT}
+
+
+
+
+
+\subsubsection{Altri esperimenti}
 	
 
 
@@ -541,7 +635,7 @@ In questo capitolo vi si farà riferimento con la seguente nomenclatura: \\
 
 
 
-\section{Performance della rete}
+\section{Performance}
 
 \subsection{Tempi}
 
@@ -554,25 +648,28 @@ In questo capitolo vi si farà riferimento con la seguente nomenclatura: \\
 \subsubsection{Loss}
 
 
+
+
+
 \clearpage
 
 
 
 \section{Web Demo}
 
-Al fine di dimostrare l'utilizzo della rete in un applicativo software, viene qui illustrato lo sviluppo e il funzionamento di un'applicazione web che permette la configurazione delle rose dei due team coinvolti in una partita e la conseguente predizione del vincitore.
+Al fine di dimostrare l'utilizzo della rete in un applicativo software, viene qui illustrato lo sviluppo e il funzionamento di un'applicazione web che permette la configurazione delle rose dei due team coinvolti in una partita e la conseguente predizione del vincitore. Un ulteriore interfaccia permette anche la visualizzazione della Rete Bayesiana su cui effettuare inferenze specificando le variabili della query che si vuole sottoporre al modello Bayesiano.
 
 
 
 \subsection{Architettura}
 
-L'interfaccia web è stata sviluppata utilizzando l'architettura a 3 layer, separando frontend, backend e database.
+L'interfaccia web è stata sviluppata utilizzando l'architettura a 3 layer, con separazione di frontend, backend e database.
 
-Il database utilizzato risulta quello fornito inizialmente senza alcuna modifica. Esso consiste quindi in un file sqlite interrogabile e modificabile semplicemente tramite un web server. Esso risulta particolarmente utile per fornire i dettagli dei giocatori ed eventualmente dei team così che l'utente possa visualizzarli e sceglierli opportunamente.
+Il database utilizzato in fase di lettura è quello fornito inizialmente, senza alcuna modifica. Esso consiste quindi in un file SQLite interrogabile e modificabile semplicemente tramite un web server. Questo risulta particolarmente utile per fornire i dettagli dei giocatori ed eventualmente dei team così che l'utente possa visualizzarli e sceglierli attraverso l'opportuna interfaccia.
 
-Per lo sviluppo del backend è stato deciso di utilizzare l'engine javascript tramite il popolare progetto Node.js \cite{site:nodejs}. Esso è in grado di agire come middleware tra il frontend e il database, separando al meglio le logiche di manipolazione del dato. \'E inoltre incaricato di chiamare adeguatamente lo script R per la predizione del vincotore della partita e per svolgere l'inferenza.
+Per lo sviluppo del backend è stato deciso di utilizzare l'engine Javascript tramite il popolare progetto Node.js \cite{site:nodejs}. Esso è in grado di agire come middleware tra il frontend e il database, separando al meglio le logiche di manipolazione del dato. \'E inoltre incaricato di chiamare adeguatamente lo script R per la predizione del vincitore della partita e per svolgere le inferenze richieste.
 
-Il fronted risulta sviluppato utilizzando la libreria javascript React.js \cite{site:react}
+Il frontend è invece sviluppato utilizzando la libreria Javascript React.js \cite{site:react}
 
 
 

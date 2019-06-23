@@ -9,8 +9,8 @@ library("DataExplorer");
 library("bnlearn");
 library("caret");
 
-setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-#setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
 
 
@@ -18,8 +18,8 @@ setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 
 dfull1 = read.csv("dataset.csv", header = TRUE);
 
-## redicing to binary problem
-dfull1$winner = factor(ifelse(dfull1$winner == "home", "home", "not home"));
+## reducing to binary problem
+#dfull1$winner = factor(ifelse(dfull1$winner == "home", "home", "not home"));
 
 dfull1$id = NULL;
 dfull1$league_id = NULL;
@@ -62,8 +62,9 @@ wl = data.frame(from = connect_to_winner,to = rep("winner", length(connect_to_wi
 #dag = hpc(dfull1);
 #dag = mmpc(dfull1);
 
-dag = hc(dfull1, blacklist = bl
-         #, whitelist = wl
+dag = hc(dfull1
+         ,blacklist = bl
+         #,whitelist = wl
          );
 
 plot(dag);
