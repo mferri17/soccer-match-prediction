@@ -696,7 +696,42 @@ Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identi
 
 \subsubsection{Loss}
 
+Problema binario:
 
+Media accuracy su 10 fold: 0.6257504
+\\
+\begin{table}[!h]
+	\centering
+	\caption{10 fold cross validation SVM}\label{tab:precision_recall_f1_10fold_binary}
+	\begin{tabular}{l|llll}
+		\hline
+		Classe & Precision & Recall & F1 \\
+		\hline
+		HOME & 0.636251 & 0.4293271 & 0.5117034  \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+Problema multiclasse:
+
+Media accuracy su 10 fold: 0.5126205
+
+Media su 10 fold per ogni classe:
+
+\begin{table}[!h]
+	\centering
+	\caption{10 fold cross validation SVM}\label{tab:precision_recall_f1_10fold_multiclass}
+	\begin{tabular}{l|llll}
+		\hline
+		Classe & Precision & Recall & F1 \\
+		\hline
+		HOME & 0.5238946 & 0.849281 & 0.6477723 \\
+		AWAY & 0.482222 & 0.4263695 & 0.4516147 \\
+		DRAW & 0 & 0 & 0 \\
+		\hline
+	\end{tabular}
+\end{table}
 
 \clearpage
 
