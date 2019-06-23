@@ -9,8 +9,17 @@ library("DataExplorer");
 library("bnlearn");
 library("caret");
 
-#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+#setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+
+## HELPERS
+
+
+replaceNA = function(data) rapply(
+  list(data),
+  f=function(x) ifelse(is.na(x),0,x),
+  how="replace"
+);
 
 
 
@@ -97,6 +106,7 @@ res = cpquery(
   event = (winner == "away/draw"),
   evidence = ((home_mid == "terrible") & (away_def == "good"))
 );
+cat("\n\n");
 print(res);
 
 
@@ -105,7 +115,8 @@ print(res);
 ## CROSS VALIDATION
 
 n = 10;
-global.accuracy = c();
+accuracy = c();
+performances = c();
 
 folds <- cut(seq(1, nrow(dfull1)), breaks=n, labels=FALSE);
 
@@ -117,23 +128,67 @@ for(i in 1:n){
   fitted = bn.fit(dag, trainData); # LEARNING
   pred = predict(fitted, "winner", testData); # PREDICTION
   
-  accuracy = mean(pred == testData$winner, na.rm = TRUE);
-  global.accuracy = c(global.accuracy, accuracy);
+  performance = confusionMatrix(pred, testData$winner);
+  
+  acc = as.numeric(performance$overall["Accuracy"]);
+  acc = ifelse(!is.na(acc),acc,0);
+
+  accuracy = c(accuracy, acc);
+  
+  # binary problem evaluation
+  if (length(levels(testData$winner)) == 2) {
+    performances = c(
+      performances,
+      replaceNA(performance$byClass[c("Precision", "Recall", "F1")])
+    );
+    
+  # multiclass problem
+  } else {
+    performances = c(
+      performances,
+      replaceNA(performance$byClass[, c("Precision", "Recall", "F1")])
+    );
+    
+  }
 }
 
-cat("\n\n AVG ACCURACY ON ", n, " FOLDS: ", mean(global.accuracy), "\n\n");
+cat("\nAVG ACCURACY ON ", n, " FOLDS: ", mean(accuracy));
+
+# folds avg
+acc = 0;
+for (i in 1:length(performances)) {
+  acc = acc + performances[[i]]
+}
+res = acc/length(performances);
 
 
+# binary problem evaluation
+if (length(levels(testData$winner)) == 2) {
+  cat("\nAVG RECALL ON ", n, " FOLDS: ", res["Recall"]);
+  cat("\nAVG PRECISION ON ", n, " FOLDS: ", res["Precision"]);
+  cat("\nAVG F1 ON ", n, " FOLDS: ", res["F1"], "\n\n");
+
+# multiclass problem
+} else {
+  i = 0;
+  for (j in levels(testData$winner)) {
+    cat("\n");
+    i = i + 1;
+    cat("\nCLASS ", j, " - AVG RECALL ON ", n, " FOLDS: ", res[i, "Recall"]);
+    cat("\nCLASS ", j, " - AVG PRECISION ON ", n, " FOLDS: ", res[i, "Precision"]);
+    cat("\nCLASS ", j, " - AVG F1 ON ", n, " FOLDS: ", res[i, "F1"]);
+  }
+}
 
 
 ## BUILT-IN CROSS VALIDATION
 
-cv = bn.cv(method = "k-fold",
-           data = dfull1,
-           bn = dag,
-           loss = "pred",
-           loss.args = list(target = "winner"));
-print(cv)
+#cv = bn.cv(method = "k-fold",
+#           data = dfull1,
+#           bn = dag,
+#           loss = "pred",
+#           loss.args = list(target = "winner"));
+#print(cv)
 
 
 
