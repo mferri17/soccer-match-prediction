@@ -422,10 +422,10 @@ Mentre i difensori sono quasi sempre quattro, gli attaccanti sono fra uno e tre 
 Le analisi e le elaborazioni sui dati presentate nel seguito di questo capitolo sono state ottenute tutte attraverso l'utilizzo del linguaggio di programmazione R.
 
 \begin{figure}[H]
-	\label{fig:dataset-roles-distr}
 	\centering
 	\includegraphics[scale=0.6]{images/04_01_roles_distribution.png}
 	\caption[Distribuzione dei ruoli nelle partite]{Distribuzione dei ruoli nelle partite}
+	\label{fig:dataset-roles-distr}
 \end{figure}
 
 \begin{figure}[H]
@@ -830,13 +830,19 @@ Discretization intervals for  away_atk :    46, 67, 70, 73, 76, 79, 92
 \end{figure}
 
 
-\subsubsection{Differenti calcoli per il punteggio delle squadre}
+\subsubsection{Esperimento per il calcolo del punteggio squadre}
 
 Come ultimo tentativo di \textit{tuning} delle performance della rete si è provato a modificare il calcolo del punteggio assegnato a ciascuna squadra nei diversi ruoli calcistici. Si è rivalutato quanto spiegato nel capitolo \ref{sec:dataset-discr}, poiché ci si è resi conto che quel calcolo non tenesse conto del numero di giocatori in un certo ruolo ma solamente della media fra gli \texttt{overall\_rating}.
 
-Al fine di pesare diversamente il punteggio ottenuto da una squadra per un determinato ruolo, ad esempio l'attacco, schierando 1 piuttosto che 4 giocatori in tal ruolo, si è deciso di applicare al calcolo della media una modifica che tenesse conto del numero di giocatori. Per pesare diversamente il beneficio ottenuto dall'aggiunta o la rimozione di giocatori in differenti ruoli, si è pensato di applicare un \textit{reward} logaritmico per ciascun giocatore, considerando la distribuzione media dei giocatori per ruolo (figura \ref{fig:dataset-roles-distr}) come situazione ottimale per costruire la formazione.
+Al fine di pesare diversamente il punteggio ottenuto da una squadra per un determinato ruolo, ad esempio se questa sceglie di schierare 1 piuttosto che 4 attaccanti, si è deciso di applicare al calcolo della media una modifica che tenesse conto del numero di giocatori. Per pesare diversamente il beneficio ottenuto dall'aggiunta o la rimozione di giocatori in differenti ruoli, si è pensato di applicare un \textit{reward} logaritmico per ciascuna modifica, considerando la distribuzione media dei giocatori per ruolo (figura \ref{fig:dataset-roles-distr}) come situazione standard per costruire la formazione.
 
-% TODO: calcolo overall_rating influenzato dal numero di giocatori per ruolo
+Questa ne è risultata la nuova formula per il calcolo dei punteggi. Si consideri il caso del punteggio d'attacco per la squadra ospite, in cui \texttt{overall} è il vecchio valore calcolato (ossia la media dei punteggi ottenuti dagli attaccanti della squadra) e \texttt{avg\_atk\_count} rappresenta il numero medio di attaccanti presenti in tutte le partite del dataset. La costante \texttt{K} ha il puro scopo di riscalare il valore del logaritmo ad un valore apprezzabile se si considera che questo verrà sommato ad un valore compreso fra 1 e 100 (con media 70); tale valore è stato impostato a 20.
+
+$$
+new\_overall = overall + K*log(\frac{away\_atk}{avg\_atk\_count})
+$$
+
+Nonostante la formula possa rappresentare un buon criterio per assegnare o rimuovere una certa ricompensa in base al numero di giocatori impiegati in un certo ruolo, dal punto di vista pratico si è rivelata di fatto completamente ininfluente per effettuare le predizioni tramite la Rete Bayesiana. Tale ipotesi di \textit{tuning} è stata quindi abbandonata in favore, ancora una volta, di una trattazione più semplice.
 
 
 
@@ -859,7 +865,6 @@ In seguito è riportato il codice per effettuare la cross validation e l'output 
 cv = bn.cv(method = "k-fold", k = 10, data = dtest, bn = dag,
            loss = "pred", loss.args = list(target = "winner"));
 print(cv)
-
 
 k-fold cross-validation for Bayesian networks
 
@@ -947,7 +952,7 @@ Di seguito vengono mostrate brevemente le principali schermate dell'applicazione
 
 All'avvio dell'app, utilizzando semplicemente un browser web, è possibile notare la schermata principale con 3 tab di selezione: {\it Home team}, {\it Away team} e {\it Results}. Mentre i primi 2 permettono di modificare le squadre, il terzo consente invece di visualizzare i risultati data la configurazione precedente.
 
-La schermata di configurazione della squadra mostrata nella figura \ref{fig:team_config} sulla sinistra l'immagine di un campo da calcio su cui è possibile spostare i giocatori, semplicemente trascinandoli col mouse e opportunamente aggiunti tramite il pulsante sulla destra, creando così la formazione da utilizzare. 
+La schermata di configurazione della squadra mostrata nella figura \ref{fig:team_config} sulla sinistra l'immagine di un campo da calcio su cui è possibile spostare i giocatori, scelti da un menù a tendina, per creare la formazione da utilizzare. 
 
 \begin{figure}[H]
 	\centering
@@ -956,20 +961,22 @@ La schermata di configurazione della squadra mostrata nella figura \ref{fig:team
 	\label{fig:team_config}
 \end{figure}
 
-Una volta finita la configurazione cliccando sul tab dei risultati è possibile vedere in verde la squadra vincitrice e in rosso quella che invece è stata sconfitta. Nel caso in cui la squadra verde non dovesse essere quella che gioca in casa, è opportuno ricordare che la partità è volta a favore della squadra in trasferta, senza specificare tuttavia se si tratta di una vittoria o di un pareggio. Tale schermata viene presentata nella figura \ref{fig:match_result}. 
+Ultimata la configurazione, cliccando sul tab dei risultati è possibile vedere in verde la squadra con la maggiore probabilità di vincere ed in rosso l'altra. Nel caso in cui la squadra vincente (verde) non dovesse essere quella che gioca in casa, è opportuno ricordare che poiché il modello considera un output binario, la partita è volta a favore della squadra in trasferta ma senza tuttavia riuscire a specificare se si tratta di una vittoria per quest'ultima, piuttosto che di un pareggio. Un esempio di schermata viene presentato nella figura \ref{fig:match_result}. 
 
-\begin{figure}[H]
+\begin{figure}
 	\centering
-	\includegraphics[scale=0.35]{images/07_02_match_result.png}
+	\includegraphics[scale=0.3]{images/07_02_match_result.png}
 	\caption[Risultati match]{Risultati match}
 	\label{fig:match_result}
 \end{figure}
 
-Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'applicazione inoltre, nella parte superiore destra dello schermo sono presenti dei tasti per salvare e caricarne di precedenti, come mostrato nelle figure \ref{fig:config} \subref{fig:save_config} e \ref{fig:config} \subref{fig:load_config}.
+\vspace{4ex}
+
+Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'applicazione, nella parte superiore destra dello schermo sono presenti dei comandi per salvare la formazione scelta o caricarne di precedenti, come mostrato nelle figure \ref{fig:config} \subref{fig:save_config} e \ref{fig:config} \subref{fig:load_config}.
 
 \begin{figure}[H]
 	\centering
-	\minipage{0.4\textwidth}
+	\minipage{0.5\textwidth}
 	\subfloat[][\emph{Salvataggio configurazione}\label{fig:save_config}]{
 		\includegraphics[width=\linewidth]{images/07_02_save_config.png}
 	}
@@ -986,18 +993,20 @@ Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'appl
 
 
 
-\subsection{Predizione risultato}
+\subsection{Predizione del risultato}
 
-Per predire il vincitore della partita, come mostrato precedentemente, è stato necessario utilizzare la rete Bayesiana ottenuta a seguito degli esperimenti. Tale rete è stata infatti salvata su un file che è stato possibile poi ricaricare nell'ambiente R tramite l'apposito comando. Il web server javascript è dunque in grado di chiamare lo script R da riga di comando fornendogli in input una rappresentazione in formato JSON dei giocatori in campo con le loro caratteristiche. Lo script non deve far altro che manipolare i dati che gli sono stati forniti e applicare l'inferenza.
+Per predire il vincitore della partita, come mostrato precedentemente, è stato necessario utilizzare la rete Bayesiana ottenuta a seguito degli esperimenti. Tale rete è stata salvata in un file che è possibile ricaricare nell'ambiente R al bisogno. Il web server Javascript è dunque in grado di chiamare lo script R da riga di comando, fornendogli in input una rappresentazione in formato JSON dei giocatori in campo con le loro caratteristiche. Lo script non deve far altro che manipolare i dati che gli sono stati forniti secondo quando spiegato nel capitolo \ref{sec:dataset-elab} e successivamente applicare l'inferenza.
 
 Per mostrare inoltre il puro funzionamento della rete è stato sviluppato un semplice form che permette l'inserimento delle evidenze e fornisce in output la probabilità che un certo evento si verifichi, coerentemente a quanto specificato dall'utente.
 
-Premendo il primo pulsante a sinistra nella parte superiore destra dello schermo è possibile aprire la schermata mostrata nella figura \ref{fig:inference_view}. Nella parte sinistra dello schermo viene mostrata la topologia della rete utilizzata, con la possibilità di effettuare zoom con la rotella del mouse e spostarla tramite trascinamento, per una migliore visualizzazione. Nella parte destra vengono invece mostrati una serie di campi di input per configurare evidenze e variabile query. Una volta impostate è possibile premere il tasto {\it Compute} per calcolarne il risultato, che verrà mostrato subito sotto di esso. Nella rete è possibile inoltre visualizzare i nodi delle evidenze di colore rosso e la query di colore verde, per meglio comprendere a quali si riferiscono. \'E opportuno segnalare inoltre che gli indentificativi dei nodi possono essere visualizzati direttamente sulla rete semplicemente con il passaggio del mouse.
+Premendo il primo pulsante a sinistra nella parte superiore destra dello schermo è possibile aprire la schermata mostrata nella figura \ref{fig:inference_view}. Nella parte sinistra dello schermo viene mostrata la topologia della rete utilizzata, con la possibilità di effettuare zoom e muoverla tramite il mouse, per una più agevole visualizzazione. 
+
+Nella parte destra vengono invece mostrati una serie di campi di input per configurare evidenze e variabile query. Una volta impostate è possibile premere il tasto {\it Compute} per calcolarne il risultato, che verrà mostrato sotto al bottone stesso. Nella rete è possibile inoltre visualizzare i nodi delle evidenze di colore rosso e la query di colore verde, per meglio comprendere a quali nodi si riferiscono le scelte dell'utente. \'E opportuno segnalare inoltre che gli indentificativi dei nodi possono essere visualizzati direttamente sulla rete semplicemente con il passaggio del mouse.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.35]{images/07_03_inference.png}
-	\caption[Schermata rete Bayesiana]{Schermata rete Bayesiana}
+	\caption[Schermata di inferenza sulla Rete Bayesiana]{Schermata di inferenza sulla Rete Bayesiana}
 	\label{fig:inference_view}
 \end{figure}
 
@@ -1009,7 +1018,7 @@ Premendo il primo pulsante a sinistra nella parte superiore destra dello schermo
 
 \section{Conclusioni}
 
-Lorem ipsum dolor sit amet.
+
 
 
 
