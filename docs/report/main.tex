@@ -404,7 +404,7 @@ Come accennato nella sezione \ref{sec:dataset-hypotesis}, si è assunto che la p
 
 In particolare, considerando il campo da calcio come un piano e rivolgendosi con le spalle alla porta, si è potuto evincere che le \texttt{X} rappresentassero la posizione di un giocatore rispetto al lato corto del campo (quindi a destra o sinistra rispetto al portiere), mentre le \texttt{Y} fossero rappresentative della distanza fra il portiere e il giocatore considerato, quindi la posizione di quest'ultimo rispetto al lato lungo del campo. Proprio questa coordinata, sopratutto grazie ad una conoscenza pregressa del dominio di riferimento, si è rivelata essenziale per determinare i ruoli di ciascun giocatore durante il corso di una partita.
 
-Attraverso una scelta empirica e il confronto fra distribuzioni del numero di giocatori nei diversi ruoli, sono state fatte le seguenti assunzioni:
+Attraverso una scelta empirica e il confronto fra distribuzioni del numero di giocatori nei diversi ruoli, sono state fatte le seguenti assunzioni, che si possono ritrovare espresse graficamente anche nella figura \ref{fig:soccer-field}:
 
 \begin{itemize}
 	\item La \texttt{Y} pari a 1 è sempre occupata dal portiere;
@@ -421,10 +421,17 @@ Mentre i difensori sono quasi sempre quattro, gli attaccanti sono fra uno e tre 
 Le analisi e le elaborazioni sui dati presentate nel seguito di questo capitolo sono state ottenute tutte attraverso l'utilizzo del linguaggio di programmazione R.
 
 \begin{figure}[H]
+	\label{fig:dataset-roles-distr}
 	\centering
 	\includegraphics[scale=0.6]{images/04_01_roles_distribution.png}
 	\caption[Distribuzione dei ruoli nelle partite]{Distribuzione dei ruoli nelle partite}
-	\label{fig:dataset-roles-distr}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{images/soccer-field-horizontal.png}
+	\caption[Suddivisione del campo da calcio in ruoli]{Suddivisione del campo da calcio in ruoli}
+	\label{fig:soccer-field}
 \end{figure}
 
 
@@ -492,6 +499,7 @@ Infine, nella figura \ref{img:dataset-atk-corr} viene presentata la correlazione
 
 \clearpage
 \subsubsection{Calcolo e discretizzazione dei punteggi generali per la squadra}
+\label{sec:dataset-discr}
 
 Tramite le precedenti considerazioni si è dimostrato che è possibile utilizzare il solo attributo \texttt{overall\_rating} per descrivere efficacemente un giocatore. Per calcolare quindi i punteggi ottenuti da una certa squadra, composta dagli 11 giocatori, in una certa partita si è quindi pensato di mediare fra loro gli \texttt{overall\_rating} dei giocaori facenti parte dei 4 diversi ruoli del calcio.
 
@@ -545,7 +553,7 @@ Altre librerie utilizzate durante lo sviluppo ed in particolare per la fase di p
 
 
 
-\subsection{Progettare una rete}
+\subsection{Progettazione di una rete}
 
 Come precedentemente accennato, con \texttt{bnlearn} è possibile modellare una Rete Bayesiana sia progettandola in autonomia che facendola generare automaticamente alla libreria con la possibilità di sfruttare una moltitudine di approcci diversi.
 
@@ -625,7 +633,7 @@ Quest'ultima intuizione potrebbe essere confermata dal fatto che, riducento il p
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.75]{images/05_02_hc_bin_bl.png}
-	\caption[Rete autogenerata con algoritmo HC e blacklist sul problema binario]{Rete autogenerata con algoritmo HC e blacklist sul problema binarios}
+	\caption[Rete autogenerata con algoritmo HC e blacklist sul problema binario]{Rete autogenerata con algoritmo HC e blacklist sul problema binario}
 	\label{img:hc-bin-bl}
 \end{figure}
 
@@ -762,13 +770,71 @@ Alla luce di questa considerazione, si è deciso di considerare per le prossime 
 
 \subsubsection{Struttura della rete}
 
-% TODO: scelta quella vista sopra a fronte di altre prove fallimentari
-% TODO: rete con tutti i nodi connessi a Winner, lenta e imprecisa
+Per quanto riguarda la struttura della rete, si è scelto di considerare quella in figura \ref{img:hc-bin-bl} come punto di partenza, generata attraverso l'algoritmo \textit{hill climbing} sul problema binario, assicurandosi che le due squadre non avessero collegamenti diretti.
+
+Poiché con tale configurazione le uniche variabili collegate al nodo target \texttt{WINNER} sono risultate \texttt{HOME\_MID} e \texttt{AWAY\_MID}, si è pensato di costituire una rete con un numero maggiore di collegamenti al nodo su cui effettuare le predizioni. Aumentando il numero di archi della Rete, aumenta conseguentemente anche il tempo necessario per la stima dei parametri.
+
+Fra le varie alternative, nessuna è risultata in termini di \textit{accuracy} più performante rispetto alla Rete originale, che si attesta intorno al 60\%. Per questo motivo, si è dedotto che la rete ottenuta attraverso \textit{hill climbing} con un ridotto numero di archi fosse la migliore, e pertanto anche la semplicità della Rete stessa sia da preferire quando si ha a che fare con modelli Bayesiani.
+
+Nella figura \ref{fig:hc-bin-all} è possibile osservare un esempio di Rete fra quelle testate, in cui tutti i nodi sono collegati alla variabile target secondo un'assunzione per cui ognuno di questi dovrebbe avere influenza sul risultato di una partita. Questa Rete si è rivelata tuttavia considerevolmente peggiore, con un'\textit{accuracy} intorno al 55\% e dei tempi di stima delle CPT decisamente più importanti, con alcune righe addirittura impossibili da calcolare.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{images/06_02_hc_bin_wl_all.png}
+	\caption[Rete che collega tutte le variabili al target]{Rete che collega tutte le variabili al target}
+	\label{fig:hc-bin-all}
+\end{figure}
+
+\vspace{3ex}
+
+Un ulteriore tentativo lo si è fatto tentando di aggiungere due nuove feature per ciascuna squadra, che raggruppassero rispettivamente il potenziale difensivo (portiere + difesa + mid) e offensivo (mid + attacco) delle squadre. Avendo provato a generare una Rete Bayesiana con questi nuovi nodi, si sono comunque ottenute performance totalmente simili alle precedenti, motivo per cui si è poi deciso di tornare alla configurazione della Rete originale.
+
 
 \subsubsection{Discretizzazione delle features}
 \label{sec:perf-discret}
 
-% TODO: prove con diversi intervalli e numero break
+Nonostante l'argomento di discretizzazione sia già stato affrontato nel capitolo \ref{sec:dataset-discr}, poiché si tratta di un'operazione da eseguire sui dati prima di fornirli alla Rete, tale argomento è tornato in auge per fare le ultime considerazioni sulle performance del modello. Infatti, il modo in cui vengono discretizzati i dati assume un ruolo fondamentale per l'intero processo di predizione, in quanto il modello sia in fase di apprendimento che di predizione sfrutta i valori assunti dalle variabili considerate ed espressi secondo la discretizzazione scelta.
+
+Ci sono diversi metodi per discretizzare e per operare questo tipo di elaborazione si è utilizzato il package \texttt{arules} di R, che fra le più rilevanti mette a disposizione la discretizzazione \textit{fixed} e quella \textit{frequency-based}. Mentre la prima consente di specificare dei valori che costituiscono gli estremi degli intervalli di discretizzazione, il secondo metodo permette di effettuare una separazione automatica basata sulla distribuzione dei valori assunti dalla variabile che si sta discretizzando. L'obiettivo è quello di creare intervalli che contengano un numero bilanciato di campioni del dataset.
+
+Considerata la distribuzione delle feature scelte per costruire la Rete Bayesiana, visibile nell'immagine \ref{fig:perf-scores-distr}, si è inizialmente pensato di discretizzare i valori in 4 intervalli. Particolare importanza è stata data alla scelta di un numero di intervalli pari, per evitare che troppe feature finissero nel valore centrale.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.47]{images/06_03_score_distr.png}
+	\caption[Distribuzione dei valori assunti dalle features]{Distribuzione dei valori assunti dalle features}
+	\label{fig:perf-scores-distr}
+\end{figure}
+
+In seguito, poiché si è notato che i valori centrali delle feature fossero assunti da un gran numero di partite si è deciso di aumentare il numero di intervalli con cui discretizzare. Ciò ha portato ad un incremento nell'accuratezza dei modelli di predizione testati, motivo per cui si è rivelata un'intuizione vincente. Si è quindi scelto di delegare al pacchetto \texttt{arules} la scelta degli intervalli in maniera automatica attraverso un algoritmo basato sulla frequenza di distribuzione.
+
+Si mostrano di seguito i limiti degli intervalli adottati per ciascun attributo della Rete e in figura \ref{fig:perf-discr-distr} anche la distribuzione assunta delle feature della squadra di casa in seguito alla discretizzazione. Si nota facilmente come il dataset si distribuisca equamente sui 6 intervalli creati, rinominati con delle etichette testuali e semanticamente rilevanti per agevolarne la lettura.
+
+\begin{verbatim}
+Discretization intervals for  home_gk :     48, 66, 71, 74, 77, 80, 90
+Discretization intervals for  home_def :    52, 65, 69, 72, 74, 76, 86
+Discretization intervals for  home_mid :    52, 66, 70, 72, 74, 77, 88
+Discretization intervals for  home_atk :    48, 67, 70, 73, 76, 79, 91
+Discretization intervals for  away_gk :     49, 66, 71, 74, 77, 80, 90
+Discretization intervals for  away_def :    52, 65, 69, 72, 74, 76, 86
+Discretization intervals for  away_mid :    51, 66, 70, 72, 74, 77, 89
+Discretization intervals for  away_atk :    46, 67, 70, 73, 76, 79, 92
+\end{verbatim}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{images/06_04_discr_distr.png}
+	\caption[Distribuzione dei valori assunti dalle features dopo la discretizzazione]{Distribuzione dei valori assunti dalle features dopo la discretizzazione}
+	\label{fig:perf-discr-distr}
+\end{figure}
+
+
+\subsubsection{Differenti calcoli per il punteggio delle squadre}
+
+Come ultimo tentativo di \textit{tuning} delle performance della rete si è provato a modificare il calcolo del punteggio assegnato a ciascuna squadra nei diversi ruoli calcistici. Si è rivalutato quanto spiegato nel capitolo \ref{sec:dataset-discr}, poiché ci si è resi conto che quel calcolo non tenesse conto del numero di giocatori in un certo ruolo ma solamente della media fra gli \texttt{overall\_rating}.
+
+Al fine di pesare diversamente il punteggio ottenuto da una squadra per un determinato ruolo, ad esempio l'attacco, schierando 1 piuttosto che 4 giocatori in tal ruolo, si è deciso di applicare al calcolo della media una modifica che tenesse conto del numero di giocatori. Per pesare diversamente il beneficio ottenuto dall'aggiunta o la rimozione di giocatori in differenti ruoli, si è pensato di applicare un \textit{reward} logaritmico per ciascun giocatore, considerando la distribuzione media dei giocatori per ruolo (figura \ref{fig:dataset-roles-distr}) come situazione ottimale per costruire la formazione.
+
 % TODO: calcolo overall_rating influenzato dal numero di giocatori per ruolo
 
 
@@ -833,6 +899,21 @@ A differenza di quanto mostrato in tabella \ref{tab:10-fold-tern} per il problem
 Dalle metriche misurate si evince un valore accettabile di veri positivi nel considerare la squadra di casa vincente, ma anche una considerevole percentuale di falsi negativi.
 
 Probabilmente ciò è dovuto all'effettiva difficoltà nel riuscire a predire il vincitore di una partita di calcio se ci si limita a osservare le caratteristiche dei giocatori che le compongono. Ciò accade perché molte volte si assiste a partite nelle quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore un'operazione diventa decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore.
+
+
+\subsubsection{ROC curve e AUC}
+
+Come ultima metrica di valutazione si è scelto di considerare anche il grafico della \textit{receiver operating characteristic curve} per mettere in relazione la percentuale di veri e falsi positivi. Questa si può osservare in figura \ref{fig:perf-roc}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{images/06_roc.png}
+	\caption[Grafico della ROC curve]{Grafico della ROC curve}
+	\label{fig:perf-roc}
+\end{figure}
+
+Dal grafico della ROC è quindi stato possibile calcolare l'\textit{area under curve}, che determina la bontà generale del modello di predizione. \\ Il valore dell'AUC è risultato pari a 0.6103608.
+
 
 
 
