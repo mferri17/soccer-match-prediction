@@ -3,21 +3,27 @@ Studenti:
 Basso Matteo, matricola 807628
 Ferri Marco, matricola 807130
 
+
+-----------------------------------------------
+
 Struttura file e cartelle:
 
-- report.pdf: relazione del progetto
+- MPD-BassoFerri-Report.pdf: relazione del progetto
+- MPD-BassoFerri-Slides.pdf: presentazione del progetto
+
 - dataset
-    - database.sqlite: database relazione fornito unitamente al progetto
-    - MATCH_JOIN.csv: tabella dei match con tutti gli attributi dei giocatori a seguito del join
+    - MATCH_JOIN.csv:
+        dataset risultante dal join delle tabelle Match e PlayerAttributes del database d'origine, come spiegato nella relazione
+
 - R-scripts: codici R
     - 01_analyze.R: analisi esplorativa del dataset
-    - 02_transform.R: manipolazione dei match, discretizzazione, creazione dataset rete bayesiana
-    - 03_predict.R: creazione rete bayesiana e valutazione performance
-    - dataset.csv: dataset creato a seguito dello step 2
-    - bayesian_network.rds: rete bayesiana salvata su file, utile per essere utilizzata dal server
-    - ui_inference.R: script utilizzato dal server per fare inferenza date le evidenze
-    - ui_predict.R: script utilizzato per predire il risultato di un match dati i giocatori
+    - 02_transform.R: manipolazione dei Match, discretizzazione e creazione del dataset per la rete Bayesiana
+    - 03_predict.R: creazione rete Bayesiana e valutazione delle performance
+    - dataset.csv: dataset utilizzato per la creazione della rete, generato a seguito dell'esecuzione di 02_transform.R
+    - bayesian_network.rds: rete bayesiana generata da 03_predict.R e salvata su file, utile per essere utilizzata dalla demo
+    - ui_inference.R: script utilizzato dalla demo per eseguire le inferenze richieste dall'utente
+    - ui_predict.R: script utilizzato dalla demo per predire il risultato di un Match dati i giocatori, scelti dall'utente
     - mapRow.R: helper per la creazione del dataset, utilizzato da diversi altri script
-- app: frontend utile per la presentazione e demo
-- server: web server che si interfaccia con R ed espone le REST API al frontend
-    - server.js: server seguibile tramite Node.js
+
+- app:      contenente il front-end per eseguire una demo delle funzionalità
+- server:   contenente il back-end per esporre al front-end le REST API che si interfacciano con R per l'utilizzo della rete Bayesiana
