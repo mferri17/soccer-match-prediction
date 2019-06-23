@@ -493,7 +493,7 @@ Infine, nella figura \ref{img:dataset-atk-corr} viene presentata la correlazione
 \clearpage
 \subsubsection{Calcolo e discretizzazione dei punteggi generali per la squadra}
 
-Tramite le precedenti considerazioni si è dimostrato che è possibile utilizzare il solo attributo \texttt{overall\_rating} per descrivere efficaciemente un giocatore. Per calcolare quindi i punteggi ottenuti da una certa squadra, composta dagli 11 giocatori, in una certa partita si è quindi pensato di mediare fra loro gli \texttt{overall\_rating} dei giocaori facenti parte dei 4 diversi ruoli del calcio.
+Tramite le precedenti considerazioni si è dimostrato che è possibile utilizzare il solo attributo \texttt{overall\_rating} per descrivere efficacemente un giocatore. Per calcolare quindi i punteggi ottenuti da una certa squadra, composta dagli 11 giocatori, in una certa partita si è quindi pensato di mediare fra loro gli \texttt{overall\_rating} dei giocaori facenti parte dei 4 diversi ruoli del calcio.
 
 Così facendo si sono ottenuti 4 valori continui, da 1 a 100, rappresentanti le caratteristiche generali della squadra sulla base dei giocatori coinvolti nella partita. Successivamente verrà dimostrato che, per il caso in esame, considerare anche il numero di giocatori in un determinato ruolo è ininfluente.
 
@@ -746,7 +746,7 @@ Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'appl
 
 Per predire il vincitore della partita, come mostrato precedentemente, è stato necessario utilizzare la rete Bayesiana ottenuta a seguito degli esperimenti. Tale rete è stata infatti salvata su un file che è stato possibile poi ricaricare nell'ambiente R tramite l'apposito comando. Il web server javascript è dunque in grado di chiamare lo script R da riga di comando fornendogli in input una rappresentazione in formato JSON dei giocatori in campo con le loro caratteristiche. Lo script non deve far altro che manipolare i dati che gli sono stati forniti e applicare l'inferenza.
 
-Per mostrare inoltre il puro funzionamento della rete è stato sviluppato un semplice form che permette l'inserimento delle evidenze e fornisce in output le distribuzioni di probabilità degli altri nodi.
+Per mostrare inoltre il puro funzionamento della rete è stato sviluppato un semplice form che permette l'inserimento delle evidenze e fornisce in output la probabilità che un certo evento si verifichi, coerentemente a quanto specificato dall'utente.
 
 
 
