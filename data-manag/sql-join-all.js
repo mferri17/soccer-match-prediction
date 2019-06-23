@@ -133,7 +133,7 @@ const sqlite3 = require('sqlite3').verbose();
     });
 
 
-    queries.push(`CREATE TABLE FINAL AS 
+    queries.push(`CREATE TABLE MATCH_JOIN AS 
       SELECT * FROM ${currentTable} as TEMP
       INNER JOIN Match as match on match.match_api_id = TEMP.match_api_id;`);
     

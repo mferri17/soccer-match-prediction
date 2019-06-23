@@ -33,8 +33,7 @@ const menuItems = [
 const winnerMenuItems = [
   <MenuItem value={null} />,
   <MenuItem value="home">home</MenuItem>,
-  <MenuItem value="away">away</MenuItem>,
-  <MenuItem value="draw">draw</MenuItem>
+  <MenuItem value="not home">not home</MenuItem>
 ];
 
 const graphData = {
@@ -51,7 +50,7 @@ const graphData = {
   ],
   links: [
     { source: 'home_mid', target: 'winner' },
-    { source: 'away_def', target: 'winner' },
+    { source: 'away_mid', target: 'winner' },
     { source: 'home_def', target: 'home_gk' },
     { source: 'home_mid', target: 'home_gk' },
     { source: 'home_def', target: 'home_atk' },

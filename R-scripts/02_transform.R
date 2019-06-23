@@ -16,7 +16,7 @@ setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 
 ### DATASET
 
-final = read.csv("../dataset/FINAL.csv", header = TRUE);
+final = read.csv("../dataset/MATCH_JOIN.csv", header = TRUE);
 
 ## remove rows with NA inside
 rows = !(is.na(final$home_team_goal)) & !(is.na(final$away_team_goal));
