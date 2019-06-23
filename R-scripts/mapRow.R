@@ -1,4 +1,4 @@
-# given a row, this function computes aN overall_rating role-based aggregation
+# given a row, this function computes an overall_rating role-based aggregation
 mapRow = function(x) {
   
   result = list(); # new row
