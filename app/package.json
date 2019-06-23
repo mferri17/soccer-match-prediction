@@ -9,6 +9,7 @@
     "react-dnd": "^8.0.0",
     "react-dnd-html5-backend": "^8.0.0",
     "react-dom": "^16.8.6",
+    "react-force-graph": "^1.23.1",
     "react-scripts": "3.0.1",
     "react-waterfall": "^4.0.4",
     "react-window": "^1.8.2"
