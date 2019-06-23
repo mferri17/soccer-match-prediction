@@ -80,34 +80,34 @@ app.post('/predict', (req, res) => {
 
   exec(`Rscript ${rScriptPath}`, (err, stdout /* , stderr */) => {
     if (err) {
+      console.log(err);
       res.status(500).json(err);
     } else {
-      const perc = Number(stdout);
+      console.log(stdout);
+      const out = stdout.split(/\r?\n/);
+      const perc = Number(out[out.length - 1]);
       res.json([perc, Math.round((1 - perc) * 100) / 100]);
     }
   });
 });
 
 app.post('/inference', (req, res) => {
-  fs.writeFileSync(jsonPath, JSON.stringify(req.body));
-
-  const result = Object.keys(req.body).reduce((acc, key) => ({
+  const evidence = Object.keys(req.body).reduce((acc, cur) => ({
     ...acc,
-    [key]: key !== 'winner' ? 'very good' : 'away'
+    [cur]: req.body[cur] || undefined
   }), {});
-  res.json(result);
 
-  /* exec(`Rscript ${rInferencePath}`, (err, stdout) => {
+  fs.writeFileSync(jsonPath, JSON.stringify(evidence));
+
+  exec(`Rscript ${rInferencePath}`, (err, stdout) => {
     if (err) {
       res.status(500).json(err);
     } else {
-      const result = Object.keys(req.body).reduce((acc, key) => ({
-        ...acc,
-        [key]: key !== 'winner' ? 'very good' : 'away'
-      }), {});
-      res.json(result);
+      const out = stdout.split(/\r?\n/);
+      const perc = Number(out[out.length - 1]);
+      res.json(perc);
     }
-  }); */
+  });
 });
 
 app.listen(1234, function () {
