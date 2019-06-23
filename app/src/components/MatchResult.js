@@ -69,7 +69,7 @@ const MatchResult = ({ teams: [homeTeam, awayTeam], results }) => {
                   Away team
                 </Typography>
                 <Typography className={classes.probabilityText}>
-                  Prediction assigned exactly {'<'}{results[0]}, {results[1]}{'>'} probabilities.
+                  Prediction assigned exactly {'<'}{results[0]}, {results[1]}{'>'} probabilities (Home, not Home).
                 </Typography>
               </>
             ) : (

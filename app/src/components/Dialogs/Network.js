@@ -17,7 +17,7 @@ const rolePrefixes = [
 ];
 
 const levels = [
-  'very bad',
+  'terrible',
   'bad',
   'mediocre',
   'good',
@@ -28,6 +28,13 @@ const levels = [
 const menuItems = [
   <MenuItem value={null} />,
   ...levels.map(level => <MenuItem value={level}>{level}</MenuItem>)
+];
+
+const winnerMenuItems = [
+  <MenuItem value={null} />,
+  <MenuItem value="home">home</MenuItem>,
+  <MenuItem value="away">away</MenuItem>,
+  <MenuItem value="draw">draw</MenuItem>
 ];
 
 const graphData = {
@@ -58,20 +65,53 @@ const graphData = {
   ]
 };
 
-const initialState = graphData.nodes.reduce((acc, cur) => ({
-  ...acc,
-  [cur]: null
-}), {
+const initialState = {
   loading: false,
-  submitted: false
-});
+  result: null,
+  query: {
+    name: null,
+    value: null
+  },
+  nodes: graphData.nodes.reduce((acc, cur) => ({
+    ...acc,
+    [cur.id]: null
+  }), {})
+};
 
 const reducer = (state, action) => {
   switch (action.type) {
     case 'set-value':
       return {
         ...state,
-        [action.nodeId]: action.value
+        result: null,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: action.value
+        },
+        query: state.query.name !== action.nodeId
+          ? state.query
+          : initialState.query
+      };
+    case 'set-query-name':
+      return {
+        ...state,
+        result: null,
+        query: {
+          ...state.query,
+          name: action.value,
+          value: action.value === state.query.name
+            ? state.query.value
+            : null
+        }
+      };
+    case 'set-query-value':
+      return {
+        ...state,
+        result: null,
+        query: {
+          ...state.query,
+          value: action.value
+        }
       };
     case 'reset':
       return {
@@ -85,9 +125,8 @@ const reducer = (state, action) => {
     case 'set-result':
       return {
         ...state,
-        result: action.values,
-        loading: false,
-        submitted: true
+        result: action.value,
+        loading: false
       };
     default:
       throw new Error();
@@ -133,6 +172,11 @@ const useStyles = makeStyles(theme => ({
   },
   resetButton: {
     marginLeft: 16
+  },
+  prob: {
+    fontWeight: 'bold',
+    fontFamily: 'Roboto',
+    marginTop: 16
   }
 }));
 
@@ -156,22 +200,21 @@ const Network = () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        ...store,
-        loading: undefined,
-        submitted: undefined
+        ...store.nodes,
+        query_name: store.query.name,
+        query_value: store.query.value
       })
     })
       .then(response => response.json())
-      .then(nodes => {
+      .then(value => {
         dispatch({
           type: 'set-result',
-          values: nodes
+          value
         });
       });
-    // TODO : fetch
   }, [store.loading]);
 
-  const getFieldValue = id => store.result && store.result[id] || store[id];
+  const getFieldValue = id => store.nodes[id];
 
   const measuredRef = useCallback(node => {
     if (node !== null) {
@@ -202,7 +245,7 @@ const Network = () => {
             name: id,
             id,
           }}
-          disabled={store.submitted || store.loading}
+          disabled={store.loading}
         >
           {menuItems}
         </Select>
@@ -223,7 +266,12 @@ const Network = () => {
         backgroundColor="#F7F7F7"
         linkDirectionalArrowLength={7}
         linkDirectionalArrowRelPos={1}
-        nodeColor={node => getFieldValue(node.id) ? 'red' : undefined}
+        nodeColor={node => {
+          if (!!getFieldValue(node.id)) return 'red';
+          if (store.query.name === node.id) return 'green';
+
+          return undefined;
+        }}
       />
       <div
         className={classes.formContainer}
@@ -232,6 +280,9 @@ const Network = () => {
         }}
       >
         <div className={classes.column}>
+          <Typography variant="h5" className={classes.title}>
+            Evidence
+          </Typography>
           <div className={classes.row}>
             <div className={classes.form}>
               <Typography variant="h6" className={classes.title}>
@@ -264,20 +315,72 @@ const Network = () => {
                     name: 'winner',
                     id: 'winner',
                   }}
-                  disabled={store.submitted || store.loading}
+                  disabled={store.loading}
                 >
-                  <MenuItem value={null} />
-                  <MenuItem value="home">home</MenuItem>
-                  <MenuItem value="away">away</MenuItem>
+                  {winnerMenuItems}
                 </Select>
               </FormControl>
             </div>
+          </div>
+          <Typography variant="h5" className={classes.title}>
+            Query
+          </Typography>
+          <div className={classes.row}>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="variable">Variable</InputLabel>
+              <Select
+                value={store.query.name}
+                onChange={e => {
+                  dispatch({
+                    type: 'set-query-name',
+                    value: e.target.value
+                  });
+                }}
+                inputProps={{
+                  name: 'variable',
+                  id: 'variable',
+                }}
+              >
+                {
+                  [
+                    <MenuItem value={null} />,
+                    ...Object.keys(store.nodes)
+                        .filter(x => !getFieldValue(x))
+                        .map(key => (
+                          <MenuItem value={key}>{key}</MenuItem>
+                        ))
+                  ]
+                }
+              </Select>
+            </FormControl>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="value">Value</InputLabel>
+              <Select
+                value={store.query.value}
+                onChange={e => {
+                  dispatch({
+                    type: 'set-query-value',
+                    value: e.target.value
+                  });
+                }}
+                inputProps={{
+                  name: 'value',
+                  id: 'value',
+                }}
+              >
+                {
+                  store.query.name === 'winner'
+                    ? winnerMenuItems
+                    : menuItems
+                }
+              </Select>
+            </FormControl>
           </div>
           <div className={classes.formFooter}>
             <Button
               variant="contained"
               color="primary"
-              disabled={store.submitted || store.loading}
+              disabled={!store.query.name || !store.query.value || store.loading}
               onClick={() => {
                 dispatch({
                   type: 'compute'
@@ -299,6 +402,18 @@ const Network = () => {
               Reset
             </Button>
           </div>
+          {
+            store.result !== null && (
+              <Typography variant="p" className={classes.prob}>
+                P({store.query.name} = {store.query.value} | {
+                  Object.keys(store.nodes)
+                    .filter(key => store.nodes[key])
+                    .map(id => `${id} = ${store.nodes[id]}`)
+                    .join(', ')
+                }) = {store.result}
+              </Typography>
+            )
+          }
         </div>
       </div>
     </div>

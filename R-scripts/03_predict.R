@@ -9,8 +9,8 @@ library("DataExplorer");
 library("bnlearn");
 library("caret");
 
-#setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
-setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
+setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
+#setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
 
 
 
@@ -84,7 +84,7 @@ dtest <- dfull1[-train_ind, ]
 fitted = bn.fit(dag, dtrain);
 
 ## save model on file
-#write.dsc("bayesian_network_1.rds", fitted);
+write.dsc("bayesian_network.rds", fitted);
 
 # performance
 pred = predict(fitted, "winner", dtest);
