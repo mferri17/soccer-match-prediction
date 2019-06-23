@@ -497,7 +497,7 @@ Tramite le precedenti considerazioni si è dimostrato che è possibile utilizzar
 
 Così facendo si sono ottenuti 4 valori continui, da 1 a 100, rappresentanti le caratteristiche generali della squadra sulla base dei giocatori coinvolti nella partita. Successivamente verrà dimostrato che, per il caso in esame, considerare anche il numero di giocatori in un determinato ruolo è ininfluente.
 
-Al fine di sottoporre queste informazioni ad una Rete Bayesiana, si è quindi proceduto con una discretizzazione dei valori. Inizialmente, si è scelto di utilizzare 4 intervalli di discretizzazione; più avanti in questo elaborato si mostrerà come questa scelta possa avere un'influenza sulle performance del modello di predizione.
+Al fine di sottoporre queste informazioni ad una Rete Bayesiana, si è quindi proceduto con una discretizzazione dei valori ottenuti, che erano compresi fra 1 e 100. Inizialmente, si è scelto di utilizzare 4 intervalli di discretizzazione; più avanti in questo elaborato (nella sezione \ref{sec:perf-discret}) si mostrerà come questa scelta possa avere un'influenza sulle performance del modello di predizione.
 
 \vspace{5ex}
 
@@ -604,8 +604,8 @@ Di seguito viene mostrato il codice che genera la rete in figura \ref{img:hc-bl}
 home_attr = c("home_gk", "home_def", "home_mid", "home_atk");
 away_attr = c("away_gk", "away_def", "away_mid", "away_atk");
 bl = rbind(
-as.matrix(expand.grid(home_attr, away_attr)),
-as.matrix(expand.grid(away_attr, home_attr))
+           as.matrix(expand.grid(home_attr, away_attr)),
+           as.matrix(expand.grid(away_attr, home_attr))
 dag = hc(dfull1, blacklist = bl);
 \end{verbatim}
 
@@ -664,10 +664,9 @@ La funzione \texttt{cpquery(fitted, event, evidence, cluster, method)} consente 
 
 \begin{verbatim}
 res = cpquery(
-fitted,
-event = (winner == "home"),
-evidence = ((home_mid == "terrible") & (away_def == "good"))
-);
+      fitted,
+      event = (winner == "home"),
+      evidence = ((home_mid == "terrible") & (away_def == "good")));
 print(res);
 \end{verbatim}
 
@@ -680,8 +679,17 @@ Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identi
 
 A scopo dimostrativo, si presentano in questa sede alcune delle inferenze che è possibile produrre attraverso la libreria \texttt{bnlearn} e l'ultima rete mostrata. I seguenti esempi sono stati generati attraverso l'interfaccia grafica che sarà spiegata nel capitolo \ref{sec:ui}.
 
-% TODO: inserire inferenze fatte con UI
+\begin{verbatim}
+P(winner = home | home_mid = terrible, away_mid = good) = 0.184466
+P(winner = home | home_mid = terrible, away_mid = terrible) = 0.3825503
+P(winner = home | home_mid = terrible, away_mid = excellent) = 0.1244541
+P(winner = home | home_gk = very good, away_gk = terrible) = 0.6796657
+P(winner = home | home_atk = good, away_gk = excellent) = 0.3128295
+P(winner = home | home_atk = good, away_gk = good) = 0.4764493
+P(winner = not home | home_mid = terrible, away_mid = excellent) = 0.908642
+\end{verbatim}
 
+Dai risultati, è possibile facilmente notare come la Rete sia in grado di stimare la probabilità che la squadra di casa sia vincente, sulla base dei valori attribuiti alle diverse variabili secondo la discretizzazione che sarà spiegata nel capitolo \ref{sec:perf-discret}. Gli esempi considerano il problema binario, per cui la squadra che gioca in casa può vincere o non vincere (ma senza sapere se si tratti di un pareggio o una sconfitta).
 
 
 
@@ -715,53 +723,24 @@ Anche i tempi per effettuare predizioni e inferenze sul modello già appreso son
 Alla luce di queste considerazioni, il tempo è una metrica piuttosto ininfluente per il caso in esame. L'unica accortezza necessaria è quella di evitare la generazione di strutture particolarmente dense di connessioni, pratica che rappresenta comunque una cattiva scelta anche dal punto di vista dell'accuratezza del modello che ne risulterebbe.
 
 
-\subsubsection{Struttura della rete}
-
-% TODO: scelta quella vista sopra a fronte di altre prove fallimentari
-% TODO: rete con tutti i nodi connessi a Winner, lenta e imprecisa
-
-\subsubsection{Discretizzazione delle features}
-
-% TODO: prove con diversi intervalli e numero break
-% TODO: calcolo overall_rating influenzato dal numero di giocatori per ruolo
-
 \subsubsection{Problema ternario o binario}
 
+Come accennato nel precedente capitolo, il dataset utilizzato per apprendere la struttura e i parametri della Rete Bayesiana presenta una cattiva distribuzione per la variabile target \texttt{WINNER}. Come mostrato in figura \ref{img:perf-target-distr}, la maggior parte delle partite considerate sono state vinte da parte della squadra in casa, mentre la rimanente parte è quasi equamente suddivisa fra pareggi e vittoria per la squadra in trasferta.
 
-\subsection{Cross Fold Validation}
-
-\subsubsection{Accuracy}
-
-\subsubsection{Precision e Recall}
-
-\subsubsection{Loss}
-
-Problema binario:
-
-Media accuracy su 10 fold: 0.6257504
-\\
-\begin{table}[!h]
+\begin{figure}[H]
 	\centering
-	\caption{10 fold cross validation SVM}\label{tab:precision_recall_f1_10fold_binary}
-	\begin{tabular}{l|llll}
-		\hline
-		Classe & Precision & Recall & F1 \\
-		\hline
-		HOME & 0.636251 & 0.4293271 & 0.5117034  \\
-		\hline
-	\end{tabular}
-\end{table}
+	\includegraphics[scale=0.6]{images/06_01_target-distr.png}
+	\caption[Distribuzione della variabile target]{Distribuzione della variabile target}
+	\label{img:perf-target-distr}
+\end{figure}
 
+Considerata tale distribuzione e il dominio del problema, è facile aspettarsi che per un modello di predizione possa essere complesso determinare quali siano i casi nei quali a vincere è la squadra ospite o, ancor peggio, si ottenga un pareggio. Il calcio infatti non è chiaramente una scienza esatta, motivo per cui le statistiche delle due squadre non bastano autonomamente per determinare l'esito della partita, specialmente qualora queste abbiano caratteristiche simili; in egual modo, è difficile determinare le motivazioni per cui due squadre sulla carta molto diverse abbiano potuto terminare la partita con un egual numero di goal.
 
-Problema multiclasse:
+Per questi motivi, ci si aspetta che il modello di Rete Bayesiana abbia delle cattive performance proprio per quanto riguarda la predizione di un modello a tre classi (\texttt{WINNER} = \textit{home/away/draw}), ed in particolare con quanto ottenuto nelle due classi in minoranza. A dimostrazione di ciò, vengono presentate in tabella \ref{tab:10-fold-tern} le metriche di \textit{precision}, \textit{recall} e \textit{F1} calcolate come media di una 10-fold cross validation sulla Rete Bayesiana che era stata presentata in figura \ref{img:hc-bin-bl}.
 
-Media accuracy su 10 fold: 0.5126205
-
-Media su 10 fold per ogni classe:
-
-\begin{table}[!h]
+\begin{table}[H]
 	\centering
-	\caption{10 fold cross validation SVM}\label{tab:precision_recall_f1_10fold_multiclass}
+	\caption{10 fold cross validation sul problema ternario}
 	\begin{tabular}{l|llll}
 		\hline
 		Classe & Precision & Recall & F1 \\
@@ -771,7 +750,91 @@ Media su 10 fold per ogni classe:
 		DRAW & 0 & 0 & 0 \\
 		\hline
 	\end{tabular}
+	\label{tab:10-fold-tern}
 \end{table}
+
+Nonostante l'\textit{accuracy} del modello sia del 0.5126, che non è un risultato particolarmente cattivo per un problema ternario di questo tipo, è possibile notare in tabella come i dati per la classe \textit{draw} siano pari a zero, indice del fatto che il modello non è mai in grado di predire una partita con risultato di pareggio.
+
+\vspace{4ex}
+
+Alla luce di questa considerazione, si è deciso di considerare per le prossime valutazioni solamente il problema di natura binaria in grado di predire se il vincitore di una partita sia la squadra in casa o meno; in quest'ultimo caso, non sarà dato sapere se il match sia più incline a concludersi con un pareggio o con la vittoria della squadra ospite. Come si vedrà nella sezione \ref{sec:perf-cross-fold} dedicata alla cross fold validation, il modello addestrato sul problema binario sarà in proporzione meno accurato, ma privo di mal condizionamenti causati da una cattiva distribuzione della variabile target nel dataset.
+
+
+\subsubsection{Struttura della rete}
+
+% TODO: scelta quella vista sopra a fronte di altre prove fallimentari
+% TODO: rete con tutti i nodi connessi a Winner, lenta e imprecisa
+
+\subsubsection{Discretizzazione delle features}
+\label{sec:perf-discret}
+
+% TODO: prove con diversi intervalli e numero break
+% TODO: calcolo overall_rating influenzato dal numero di giocatori per ruolo
+
+
+
+\subsection{Cross Fold Validation}
+\label{sec:perf-cross-fold}
+
+Scelta la migliore elaborazione sulle feature da considerare e generata la struttura ottimale della Rete Bayesiana, abbiamo quindi applicato tutte le metriche di valutazione al modello appreso da \texttt{bnlearn}. In particolare, abbiamo deciso di implementare una cross fold validation sia attraverso una funzione di libreria, sia in maniera personalizzata.
+
+
+\subsubsection{Funzione \texttt{bn.cv()}}
+
+La libreria \texttt{bnlearn} mette a disposizione una comoda funzione \texttt{bn.cv(data, bn, loss)} per effettuare la cross fold validation. Questa consente di applicare diverse strategie di validazione e calcolare la \textit{loss} con svariati criteri di valutazione.
+
+Per il progetto in esame, avendo a che fare con variabili di natura discreta si è optato per una \textit{loss} espressa come \textit{Classification Error} calcolata su una 10-fold validation standard. Tale \textit{loss} rappresenta l'errore di predizione per un singolo nodo, risultando quindi particolarmente indicata per valutare le performance della Rete nel predire la variabile target \texttt{WINNER}. Per il calcolo, viene sfruttata la proprietà di dipendenza locale della rete, quindi solo i genitori del nodo su cui si sta effettuando la predizione.
+
+In seguito è riportato il codice per effettuare la cross validation e l'output della stessa, che riporta sia la struttura della rete che il valore di \textit{loss} ottenuto. Quest'ultimo è coerente con l'\textit{accuracy} che verrà mostrata nella sezione successiva.
+
+\begin{verbatim}
+
+cv = bn.cv(method = "k-fold", k = 10, data = dtest, bn = dag,
+           loss = "pred", loss.args = list(target = "winner"));
+print(cv)
+
+
+k-fold cross-validation for Bayesian networks
+
+target network structure:
+[home_def][away_def][home_mid|home_def][away_mid|away_def]
+[winner|home_mid:away_mid][home_gk|home_def:home_mid]
+[home_atk|home_def:home_mid][away_gk|away_def:away_mid]
+[away_atk|away_def:away_mid]
+
+number of folds:                  10 
+loss function:                    Classification Error 
+training node:                    winner 
+expected loss:                    0.3809976 
+\end{verbatim}
+
+
+\subsubsection{Accuracy, Precision e Recall}
+
+Poiché la funzione integrata in \texttt{bnlearn} per la cross validation prevede come output solamente il valore della \textit{loss}, si è scelto di implementare anche una cross validation personalizzata per calcolare i valori di \textit{accuracy}, \textit{precision}, \textit{recall} e \textit{F1} al fine di valutare la bontà delle predizioni.
+
+Calcolando tali valori su 10 fold e mediandone i risultati, si ottiene un'\textit{accuracy} del 62.57\% e le metriche riportate in tabella \ref{tab:10-fold-bin}. Queste tengono in considerazione la predizione della variabile \texttt{WINNER} con il valore \textit{home}, cioè considerando la squadra che gioca in casa come vincitrice.
+
+\begin{table}[H]
+	\centering
+	\caption{10 fold cross validation SVM}
+	\begin{tabular}{l|llll}
+		\hline
+		Classe & Precision & Recall & F1 \\
+		\hline
+		HOME & 0.636251 & 0.4293271 & 0.5117034  \\
+		\hline
+	\end{tabular}
+	\label{tab:10-fold-bin}
+\end{table}
+
+A differenza di quanto mostrato in tabella \ref{tab:10-fold-tern} per il problema multiclasse, si può questa volta notare un peggioramento delle performance generali \textit{F1} per la classe \textit{home}, a fronte però di un risultato non completamente sbilanciato in sfavore di una certa classe, come accadeva per \textit{away} e \textit{draw} sul problema a tre classi.
+
+Dalle metriche misurate si evince un valore accettabile di veri positivi nel considerare la squadra di casa vincente, ma anche una considerevole percentuale di falsi negativi.
+
+Probabilmente ciò è dovuto all'effettiva difficoltà nel riuscire a predire il vincitore di una partita di calcio se ci si limita a osservare le caratteristiche dei giocatori che le compongono. Ciò accade perché molte volte si assiste a partite nelle quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore un'operazione diventa decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore.
+
+
 
 \clearpage
 
