@@ -545,16 +545,20 @@ Altre librerie utilizzate durante lo sviluppo ed in particolare per la fase di p
 
 
 
-\subsection{Funzionamento della rete}
+\subsection{Progettare una rete}
 
 Come precedentemente accennato, con \texttt{bnlearn} è possibile modellare una Rete Bayesiana sia progettandola in autonomia che facendola generare automaticamente alla libreria con la possibilità di sfruttare una moltitudine di approcci diversi.
 
 Gli step per la progrettazione di una Rete sono in primis la modellazione della sua struttura e poi la specifica dei parametri, ossia delle probabilità condizionate di ciascun nodo (CPT). Una peculiarità delle Reti Bayesiane, se confrontate ad altri modelli con cui è possibile fare Machine Learning, è quella di essere completamente visibile agli occhi del programmatore e soprattutto semanticamente significativa, specie per quanto riguarda il DAG rappresentante la struttura della rete stessa. \'E importante che il grafo della Rete non sia particolarmente complesso, sia per facilitarne la lettura che per evitare un peggioramento delle performance incontrollato.
 
 
-\subsubsection{Generazione della struttura}
+
+\subsection{Generazione della struttura}
 
 Nel caso in esame, si è deciso di sfruttare in primis una rete auto generata dai dati a disposizione. Ciò ha il vantaggio di essere immediatamente funzionante e tendenzialmente cablata per avere delle prestazioni quasi ottimali. La generazione delle struttura avviene tramite un approccio data-driven, sfruttando il dataset su cui si vuole fare predizioni e inferenze. All'approccio numerico basato sui dati, segue spesso un \textit{tuning} effettuato sulla conoscenza del dominio di riferimento, come possono essere ad esempio determinate assunzioni fatte a priori.
+
+
+\subsubsection{Algoritmo di apprendimento}
 
 \texttt{bnlearn} mette a disposizione del programmatore svariati metodi per l'apprendimento della struttura della Rete: \textit{constraint-based}, \textit{score-based} e \textit{hybrid}. Partendo da una condizione iniziale di indecisione relativo al metodo migliore da utilizzare per il progetto in esame, si è scelto di utilizzare un approccio empirico basato sulla sperimentazione. Provando svariati algoritmi, si è notato che molti di questi lasciavano all'interno della rete dei nodi completamente isolati, motivo per cui sono stati scartati a priori.
 
@@ -566,6 +570,10 @@ Fra i metodi che sono sembrati più "corretti" nella generazione della Rete è e
 	\caption[Algoritmo Hill Climbing per l'apprendimento della struttura di una BN]{Algoritmo Hill Climbing per l'apprendimento della struttura di una BN}
 	\label{img:hc-algorithm}
 \end{figure}
+
+
+\clearpage
+\subsubsection{Autogenerazione}
 
 Il codice per la generazione e visualizzazione della struttura della Rete Bayesiana con \texttt{bnlearn} è decisamente semplice, e porta al risultato mostrato nella figura \ref{img:hc-pure}:
 
@@ -583,7 +591,13 @@ plot(dag);
 
 Nonostante la rete generata (figura \ref{img:hc-pure}) appaia semplice e piuttosto sensata, è doveroso far notare che alcuni archi contraddicono le assunzioni fatte nella sezione \ref{sec:bn-assumptions} per cui è stato detto che le due squadre in competizione devono essere composte da nodi causalmente indipendenti. Come si vede nell'immagine, \texttt{HOME\_MID} ha un arco entrante in \texttt{AWAY\_DEF} e come se non bastasse anche \texttt{WINNER}, la variabile target, va a finire dentro il medesimo nodo. Per questo motivo, si è dimostrato necessario introdurre un intervento manuale per la generazione della rete.
 
-Sfruttando un parametro chiamato \texttt{blacklist}, è stata fornita alla funzione \texttt{hc} una lista di archi da \textbf{non} includere nella rete. Così facendo è stato possibile impedire alle due squadre di collegarsi fra loro. \\
+
+\clearpage
+\subsubsection{Vincoli di generazione}
+
+Attraverso \texttt{bnlearn} è possibile specificare alcuni vincoli riguardanti la creazione automatica della struttura della Rete, sia in termini di archi da evitare che di archi da includere nella struttura stessa.
+
+Sfruttando un parametro chiamato \texttt{blacklist}, è stata fornita alla funzione \texttt{hc} una lista di archi da \textbf{non} includere nella rete. Così facendo è stato possibile impedire alle due squadre di collegarsi fra loro, come scelto nelle assunzioni. \\
 Di seguito viene mostrato il codice che genera la rete in figura \ref{img:hc-bl}.
 
 \begin{verbatim}
@@ -597,7 +611,7 @@ dag = hc(dfull1, blacklist = bl);
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{images/05_02_hc_bl.png}
+	\includegraphics[scale=0.8]{images/05_02_hc_bl.png}
 	\caption[Rete autogenerata con algoritmo HC e blacklist per evitare che le due squadre si connettessero fra loro]{Rete autogenerata con algoritmo HC e blacklist per evitare che le due squadre si connettessero fra loro}
 	\label{img:hc-bl}
 \end{figure}
@@ -610,7 +624,7 @@ Quest'ultima intuizione potrebbe essere confermata dal fatto che, riducento il p
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{images/05_02_hc_bin_bl.png}
+	\includegraphics[scale=0.75]{images/05_02_hc_bin_bl.png}
 	\caption[Rete autogenerata con algoritmo HC e blacklist sul problema binario]{Rete autogenerata con algoritmo HC e blacklist sul problema binarios}
 	\label{img:hc-bin-bl}
 \end{figure}
@@ -618,7 +632,7 @@ Quest'ultima intuizione potrebbe essere confermata dal fatto che, riducento il p
 Si vedranno più avanti in questo elaborato le implicazioni sulle performance derivate dalla considerazione di un problema binario piuttosto che ternario, o viceversa.
 
 
-\subsubsection{Generazione delle CPT}
+\subsection{Generazione delle CPT}
 
 Appresa (o manualmente generata) la struttura della Rete, è quindi necessario fissare i parametri, cioè le probabilità condizionate di ciascun nodo. Grazie alla proprietà di Markov per cui un nodo è influenzato solo localmente dai nodi facenti parte del suo Markov Blanket, calcolare le CPT è un'operazione relativamente rapida se, come in questo caso, i nodi non hanno un numero particolarmente elevato di archi entranti. Questa proprietà rappresenta un considerevole vantaggio, perché significa che la complessità di calcolare i parametri della rete non cresce con la dimensione della rete ma solamente con il numero di nodi localmente dipendenti.
 
@@ -631,11 +645,11 @@ fitted = bn.fit(dag, dtrain);
 A differenza di quanto avviene per la generazione della struttura, l'apprendimento dei parametri dovrebbe essere eseguito solamente sul training set.
 
 
-\subsubsection{Predizione e inferenza}
+\subsection{Predizione e inferenza}
 
 Una volta generate sia la struttura che i parametri della Rete Bayesiana è finalmente possibile effettuare predizioni e inferenze con il modello appreso. Ancora una volta, le istruzioni sono di semplice utilizzo. 
 
-\vspace{2ex}
+\vspace{3ex}
 
 La funzione \texttt{predict(object, node, data, method)} permette di generare un insieme di predizioni per una data variabile e successivamente verificare quanto predetto sia coerente con il test set.
 
@@ -644,7 +658,7 @@ pred = predict(fitted, "winner", dtest);
 cat("Accuracy:", mean(pred == dtest$winner, na.rm = TRUE));
 \end{verbatim}
 
-\vspace{2ex}
+\vspace{3ex}
 
 La funzione \texttt{cpquery(fitted, event, evidence, cluster, method)} consente invece di effettuare inferenze, calcolando la probabilità che un evento si verifichi date le evidenze, sfruttando il modello appreso.
 
@@ -662,20 +676,11 @@ print(res);
 Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identica a quella di \texttt{cpquery}, ma volta alla generazione di campioni casuali date le evidenze e in accordo con le CPT dei nodi di volta in volta campionati.
 
 
+\subsubsection{Qualche esempio}
 
-\subsection{Ricerca della soluzione migliore}
+A scopo dimostrativo, si presentano in questa sede alcune delle inferenze che è possibile produrre attraverso la libreria \texttt{bnlearn} e l'ultima rete mostrata. I seguenti esempi sono stati generati attraverso l'interfaccia grafica che sarà spiegata nel capitolo \ref{sec:ui}.
 
-\subsubsection{Discretizzazione delle features}
-
-% TODO: prove con diversi intervalli e numero break
-% TODO: calcolo overall_rating influenzato dal numero di giocatori per ruolo
-
-\subsubsection{Struttura della rete}
-
-% TODO: scelta quella vista sopra a fronte di altre prove fallimentari
-% TODO: rete con tutti i nodi connessi a Winner, lenta e imprecisa
-
-\subsubsection{Problema binario o ternario}
+% TODO: inserire inferenze fatte con UI
 
 
 
@@ -686,7 +691,42 @@ Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identi
 
 \section{Performance}
 
-\subsection{Tempi}
+Quando si modellano delle Reti Bayesiane e si sceglie di auto-generare la struttura della rete o comunque provare diverse possibili strutture, è essenziale sfruttare un approccio di tipo sperimentale per determinare, al netto delle assunzioni, quale possa rappresentare la soluzione migliore dal punto di vista delle prestazioni ottenute.
+
+Queste prevedono la necessità di tenere in considerazione diverse metriche standard, che esprimono la bontà di un modello di apprendimento e quindi di predizione sui risultati futuri. Ciò è possibile suddividendo in due (o più) parti il dataset che si vuole fornire all'algoritmo di stima dei parametri della Rete. Ricavando un training set su cui addestrare il modello predittivo e successivamente un test set tramite il quale provare il modello generato, è possibile quindi dedurre le metriche di valutazione.
+
+Al fine di valutare diversi modelli da adottare per questo progetto, le analisi preliminari sulle varie possibilità sono state effettuate attraverso una suddivisione del dataset in 75\% per il tranining set e 25\% per il test set; successivamente, una k-fold cross validation è stata utilizzata per ottenere valutazioni più accurate.
+
+
+
+\subsection{Ricerca della soluzione migliore}
+
+La ricerca del modello di apprendimento migliore, sia in termini di elaborazione dei dati che generazione della Rete Bayesiana, ha seguito un'evoluzione graduale volta ad individuare la soluzione più accurata per le predizioni sul test set. Questo tipo di valutazione ha coinvolto diversi aspetti che sono di seguito presentati.
+
+
+\subsubsection{Tempi}
+
+Un importante aspetto da considerare quando si ha a che fare con modelli di apprendimento, e più in generale con qualsiasi tipo di Machine Learning, è il tempo necessario per imparare i parametri del modello e successivamente stimare il target di nuove istanze. In questo caso specifico, sia l'algoritmo per la generazione della Rete che per la stima dei parametri si sono rivelati decisamente performanti.
+
+L'apprendimento della struttura della Rete è quasi istantaneo per tutti gli algoritmi provati, con tempi di esecuzione prossimi allo zero. L'apprendimento dei parametri della Rete, e quindi delle CPT, richiede invece tempi differenti a seconda della complessità della struttura. I grafi presentati nel capitolo precedente hanno richiesto sempre meno di un secondo per la stima delle CPT. Tale complessità aumenta non con la dimensione della Rete ma con l'aumentare della dipendenza causale (locale) delle variabili stocastiche, quindi nel momento in cui si tenta di stimare i parametri di una Rete nella quale i nodi che ne fanno parte hanno un considerevole numero di genitori; verrà presentato in seguito un esempio di questo tipo di Rete.
+
+Anche i tempi per effettuare predizioni e inferenze sul modello già appreso sono pressoché insignificanti per tutte le alternative provate.
+
+Alla luce di queste considerazioni, il tempo è una metrica piuttosto ininfluente per il caso in esame. L'unica accortezza necessaria è quella di evitare la generazione di strutture particolarmente dense di connessioni, pratica che rappresenta comunque una cattiva scelta anche dal punto di vista dell'accuratezza del modello che ne risulterebbe.
+
+
+\subsubsection{Struttura della rete}
+
+% TODO: scelta quella vista sopra a fronte di altre prove fallimentari
+% TODO: rete con tutti i nodi connessi a Winner, lenta e imprecisa
+
+\subsubsection{Discretizzazione delle features}
+
+% TODO: prove con diversi intervalli e numero break
+% TODO: calcolo overall_rating influenzato dal numero di giocatori per ruolo
+
+\subsubsection{Problema ternario o binario}
+
 
 \subsection{Cross Fold Validation}
 
@@ -703,6 +743,7 @@ Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identi
 
 
 \section{Web Demo}
+\label{sec:ui}
 
 Al fine di dimostrare l'utilizzo della rete in un applicativo software, viene qui illustrato lo sviluppo e il funzionamento di un'applicazione web che permette la configurazione delle rose dei due team coinvolti in una partita e la conseguente predizione del vincitore. Un ulteriore interfaccia permette anche la visualizzazione della Rete Bayesiana su cui effettuare inferenze specificando le variabili della query che si vuole sottoporre al modello Bayesiano.
 
