@@ -120,7 +120,7 @@ Verrà infine presentata un'interfaccia utente per la simulazione di una partita
 
 \section{Descrizione del dataset originale}
 
-Di seguito viene presentata la descrizione del dataset originale, prelevato da Kaggle \cite{site:kaggle-dataset} e a sua volta creato attraverso l'unione di dati provenienti da diverse fonti, fra cui la più importante contenente le statistiche del famoso videogioco di calcio EA Sports FIFA. \cite{site:ea-fifa}. Il contenuto del dataset è rappresentato dalle principali squadre e giocatori di calcio in Europa, con le partite svolte in un periodo temporale di 6 anni.
+Di seguito viene presentata la descrizione del dataset originale, prelevato da Kaggle \cite{site:kaggle-dataset} e a sua volta creato attraverso l'unione di dati provenienti da diverse fonti, fra cui la più importante contenente le statistiche del famoso videogioco di calcio EA Sports FIFA. \cite{site:ea-fifa}. Il contenuto del dataset è rappresentato dalle principali squadre e giocatori di calcio europei, con partite svolte in un periodo temporale di 6 anni.
 
 
 
@@ -195,8 +195,6 @@ Nella tabella \ref{tab:player_attr} vengono meglio elencati i campi che descrivo
 		aggression & Aggressività \\
 		interceptions & Intercettazione \\
 		positioning & Posizionamento \\
-		vision & Vista \\
-		penalties & Falli commessi \\
 		marking & Capacità di marcare \\
 		standing\_tackle & Contrasto in piedi \\
 		sliding\_tackle & Scivolata \\
@@ -914,7 +912,7 @@ A differenza di quanto mostrato in tabella \ref{tab:10-fold-tern} per il problem
 
 Dalle metriche misurate si evince un valore accettabile di veri positivi nel considerare la squadra di casa vincente, ma anche una considerevole percentuale di falsi negativi.
 
-Probabilmente ciò è dovuto all'effettiva difficoltà nel riuscire a predire il vincitore di una partita di calcio se ci si limita a osservare le caratteristiche dei giocatori che le compongono. Ciò accade perché molte volte si assiste a partite nelle quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore un'operazione diventa decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore.
+Probabilmente ciò è dovuto all'effettiva difficoltà nel riuscire a predire il vincitore di una partita di calcio se ci si limita a osservare le caratteristiche dei giocatori che le compongono. Ciò accade perché molte volte si assiste a partite nelle quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore risulta un'operazione decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore.
 
 
 \clearpage
@@ -1035,9 +1033,9 @@ Con riferimento agli esempi mostrati al capitolo \ref{sec:inference-examples}, �
 
 Nonostante come già spiegato il dataset fosse mal distribuito fra partite vinte, perse e pareggiate per la squadra in casa (figura \ref{img:perf-target-distr}), non crediamo che il motivo delle prestazioni deludenti siano dovute a questo. Lo stesso ragionamento lo si può applicare per valutare le Reti Bayesiane come metodo per modellare il dominio scelto; sono stati condotti degli esperimenti con altri modelli di Machine Learning (Naive Bayes e Random Forest), i quali hanno evidenziato risultati del tutto paragonabili a quelli ottenuti con la Rete Bayesiana descritta in questo elaborato.
 
-Il problema principale che si affronta quando si vuole predire il risultato di una partita di calcio sta nel fatto che moltissime volte, in questo sport, si assiste a match nei quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi predire un vincitore un'operazione diventa decisamente complessa per un modello di predizione automatizzato tanto quanto lo è per un esperto del settore. L'esito di una partita dipende da innumerevoli ragioni che non si possono ricondurre semplicemente in quelle che sono solamente le capacità tecniche dei giocatori coinvolti. La mentalità di gioco dei singoli e dell'intero team, ad esempio, sono elementi fondamentali da considerare quando si pensa alla competizione fra due sistemi complessi quali sono le squadre di calcio nella loro interazione in campo.
+Il problema principale che si affronta quando si vuole predire il risultato di una partita di calcio sta nel fatto che moltissime volte, in questo sport, si assiste a match nei quali le due squadre sfidanti non sono particolarmente sbilanciate in termini di potenzialità, bensì del tutto comparabili. In questi casi, predire un vincitore è un'operazione tanto complessa per un modello di predizione automatizzato quanto lo è per un esperto del settore. L'esito di una partita dipende da innumerevoli ragioni, che non si possono riassumere semplicemente nelle capacità tecniche dei giocatori coinvolti. La mentalità di gioco dei singoli e dell'intero team, ad esempio, sono elementi fondamentali da considerare quando si pensa alla competizione fra due sistemi complessi quali sono le squadre di calcio nella loro interazione in campo.
 
-Quindi, sebbene il risultato ottenuto sia parzialmente corretto, è normale che non si riesca a raggiungere livelli di predizione ottimali. É opportuno anche considerare che questa componente di incertezza nell'esito di una partita è il motivo stesso per cui esiste il business delle scommesse e lo sport stesso, che altrimenti si ridurrebbero ad un mero insieme di numeri e probabilità.
+Quindi, sebbene il risultato ottenuto sia parzialmente corretto, è normale che non si riesca a raggiungere livelli di predizione ottimali. É opportuno anche considerare che questa componente di incertezza nell'esito di una partita è il motivo stesso per cui esistono il business delle scommesse e lo sport stesso, che altrimenti si ridurrebbero ad un mero insieme di numeri e probabilità.
 
 
 
