@@ -33,7 +33,7 @@ const menuItems = [
 const winnerMenuItems = [
   <MenuItem value={null} />,
   <MenuItem value="home">home</MenuItem>,
-  <MenuItem value="away">away</MenuItem>
+  <MenuItem value="not home">not home</MenuItem>
 ];
 
 const graphData = {
