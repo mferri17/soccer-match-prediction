@@ -11,6 +11,7 @@
 \usepackage{vmargin}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{subfig}
 \setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
 
 \title{Predicting soccer results}				% Title
@@ -946,19 +947,42 @@ Di seguito vengono mostrate brevemente le principali schermate dell'applicazione
 
 All'avvio dell'app, utilizzando semplicemente un browser web, è possibile notare la schermata principale con 3 tab di selezione: {\it Home team}, {\it Away team} e {\it Results}. Mentre i primi 2 permettono di modificare le squadre, il terzo consente invece di visualizzare i risultati data la configurazione precedente.
 
-% TODO : immagine
+La schermata di configurazione della squadra mostrata nella figura \ref{fig:team_config} sulla sinistra l'immagine di un campo da calcio su cui è possibile spostare i giocatori, semplicemente trascinandoli col mouse e opportunamente aggiunti tramite il pulsante sulla destra, creando così la formazione da utilizzare. 
 
-La schermata di configurazione della squadra mostra sulla sinistra l'immagine di un campo da calcio su cui è possibile spostare i giocatori, semplicemente trascinandoli col mouse e opportunamente aggiunti tramite il pulsante sulla destra, creando così la formazione da utilizzare.
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.35]{images/07_02_team_config.png}
+	\caption[Configurazione team]{Configurazione team}
+	\label{fig:team_config}
+\end{figure}
 
-% TODO : immagine
+Una volta finita la configurazione cliccando sul tab dei risultati è possibile vedere in verde la squadra vincitrice e in rosso quella che invece è stata sconfitta. Nel caso in cui la squadra verde non dovesse essere quella che gioca in casa, è opportuno ricordare che la partità è volta a favore della squadra in trasferta, senza specificare tuttavia se si tratta di una vittoria o di un pareggio. Tale schermata viene presentata nella figura \ref{fig:match_result}. 
 
-Una volta finita la configurazione cliccando sul tab dei risultati è possibile vedere in verde la squadra vincitrice e in rosso quella che invece è stata sconfitta.
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.35]{images/07_02_match_result.png}
+	\caption[Risultati match]{Risultati match}
+	\label{fig:match_result}
+\end{figure}
 
-% TODO : immagine
+Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'applicazione inoltre, nella parte superiore destra dello schermo sono presenti dei tasti per salvare e caricarne di precedenti, come mostrato nelle figure \ref{fig:config} \subref{fig:save_config} e \ref{fig:config} \subref{fig:load_config}.
 
-Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'applicazione inoltre, nella parte superiore destra dello schermo sono presenti dei tasti per salvare e caricarne di precedenti.
-
-% TODO : immagine
+\begin{figure}[H]
+	\centering
+	\minipage{0.4\textwidth}
+	\subfloat[][\emph{Salvataggio configurazione}\label{fig:save_config}]{
+		\includegraphics[width=\linewidth]{images/07_02_save_config.png}
+	}
+	\endminipage
+	\hfill
+	\minipage{0.4\textwidth}
+	\subfloat[][\emph{Caricamento configurazione}\label{fig:load_config}]{
+		\includegraphics[width=\linewidth]{images/07_02_load_config.png}
+	}
+	\endminipage
+	\caption{Salvataggio e caricamento configurazioni}
+	\label{fig:config}
+\end{figure}
 
 
 
@@ -967,6 +991,15 @@ Per non dover ricreare configurazioni dall'inizio ogni qualvolta si avvii l'appl
 Per predire il vincitore della partita, come mostrato precedentemente, è stato necessario utilizzare la rete Bayesiana ottenuta a seguito degli esperimenti. Tale rete è stata infatti salvata su un file che è stato possibile poi ricaricare nell'ambiente R tramite l'apposito comando. Il web server javascript è dunque in grado di chiamare lo script R da riga di comando fornendogli in input una rappresentazione in formato JSON dei giocatori in campo con le loro caratteristiche. Lo script non deve far altro che manipolare i dati che gli sono stati forniti e applicare l'inferenza.
 
 Per mostrare inoltre il puro funzionamento della rete è stato sviluppato un semplice form che permette l'inserimento delle evidenze e fornisce in output la probabilità che un certo evento si verifichi, coerentemente a quanto specificato dall'utente.
+
+Premendo il primo pulsante a sinistra nella parte superiore destra dello schermo è possibile aprire la schermata mostrata nella figura \ref{fig:inference_view}. Nella parte sinistra dello schermo viene mostrata la topologia della rete utilizzata, con la possibilità di effettuare zoom con la rotella del mouse e spostarla tramite trascinamento, per una migliore visualizzazione. Nella parte destra vengono invece mostrati una serie di campi di input per configurare evidenze e variabile query. Una volta impostate è possibile premere il tasto {\it Compute} per calcolarne il risultato, che verrà mostrato subito sotto di esso. Nella rete è possibile inoltre visualizzare i nodi delle evidenze di colore rosso e la query di colore verde, per meglio comprendere a quali si riferiscono. \'E opportuno segnalare inoltre che gli indentificativi dei nodi possono essere visualizzati direttamente sulla rete semplicemente con il passaggio del mouse.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.35]{images/07_03_inference.png}
+	\caption[Schermata rete Bayesiana]{Schermata rete Bayesiana}
+	\label{fig:inference_view}
+\end{figure}
 
 
 
