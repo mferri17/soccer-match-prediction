@@ -4,10 +4,12 @@
 # install.packages("caret", dependencies = TRUE);
 # install.packages("gower", dependencies = TRUE);
 # install.packages("arules", dependencies = TRUE);
+# install.packages("pROC", dependencies = TRUE);
 
 library("DataExplorer");
 library("bnlearn");
 library("caret");
+library("pROC");
 
 setwd("C:/Users/mbass/dev/soccer-match-prediction/R-scripts");
 #setwd("C:/Users/96mar/Desktop/Modelli Probabilistici/R-scripts");
@@ -117,6 +119,7 @@ print(res);
 n = 10;
 accuracy = c();
 performances = c();
+auc = c();
 
 folds <- cut(seq(1, nrow(dfull1)), breaks=n, labels=FALSE);
 
@@ -135,8 +138,17 @@ for(i in 1:n){
 
   accuracy = c(accuracy, acc);
   
+  foldAuc = 0;
+  if (length(levels(dfull1$winner)) == 2) {
+    rocVal = roc(as.numeric(testData$winner), as.numeric(pred));
+    plot(rocVal);
+    foldAuc = rocVal$auc;
+  }
+  
+  auc = c(foldAuc, auc);
+  
   # binary problem evaluation
-  if (length(levels(testData$winner)) == 2) {
+  if (length(levels(dfull1$winner)) == 2) {
     performances = c(
       performances,
       replaceNA(performance$byClass[c("Precision", "Recall", "F1")])
@@ -163,15 +175,16 @@ res = acc/length(performances);
 
 
 # binary problem evaluation
-if (length(levels(testData$winner)) == 2) {
+if (length(levels(dfull1$winner)) == 2) {
   cat("\nAVG RECALL ON ", n, " FOLDS: ", res["Recall"]);
   cat("\nAVG PRECISION ON ", n, " FOLDS: ", res["Precision"]);
-  cat("\nAVG F1 ON ", n, " FOLDS: ", res["F1"], "\n\n");
+  cat("\nAVG F1 ON ", n, " FOLDS: ", res["F1"]);
+  cat("\nAVG AUC ON ", n, " FOLDS: ", mean(auc), "\n\n");
 
 # multiclass problem
 } else {
   i = 0;
-  for (j in levels(testData$winner)) {
+  for (j in levels(dfull1$winner)) {
     cat("\n");
     i = i + 1;
     cat("\nCLASS ", j, " - AVG RECALL ON ", n, " FOLDS: ", res[i, "Recall"]);
@@ -180,15 +193,18 @@ if (length(levels(testData$winner)) == 2) {
   }
 }
 
+cat("\n\n");
+
+
 
 ## BUILT-IN CROSS VALIDATION
 
-#cv = bn.cv(method = "k-fold",
-#           data = dfull1,
-#           bn = dag,
-#           loss = "pred",
-#           loss.args = list(target = "winner"));
-#print(cv)
+cv = bn.cv(method = "k-fold",
+           data = dfull1,
+           bn = dag,
+           loss = "pred",
+           loss.args = list(target = "winner"));
+print(cv);
 
 
 
