@@ -85,7 +85,7 @@ dtest <- dfull1[-train_ind, ]
 fitted = bn.fit(dag, dtrain);
 
 ## save model on file
-write.dsc("bayesian_network.rds", fitted);
+#write.dsc("bayesian_network.rds", fitted);
 
 # performance
 pred = predict(fitted, "winner", dtest);
