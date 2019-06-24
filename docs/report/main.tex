@@ -67,24 +67,29 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\tableofcontents
-\pagebreak
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-\section{Abstract}
+\null\vspace{\stretch{1}}
+\section*{\centering Abstract}
 
 Il calcio è da anni lo sport più giocato e diffuso in svariati paesi del mondo. Moltissime persone seguono settimanalmente, con grande attenzione e fervore, ogni singola partita nella speranza di veder vincere la propria squadra del cuore.
 
 In questo contesto si sono inevitabilmente sviluppati un gran numero di business di enorme valore economico, fra cui ad esempio quello delle scommesse. Saper prevedere l'esito di una partita, sia in termini di vittoria che di goal segnati, rappresenta per moltissimi un argomento di particolare interesse. Durante questo studio, ci si è posti l'obiettivo di sviluppare un modello per la predizione del vincitore di una partita di calcio in maniera automatica. Tale predizione deve essere basata sulla formazione delle due squadre considerate per ciascuna partita, nonché sulle caratteristiche dei giocatori coinvolti.
 
 Il dominio di riferimento è stato modellato attraverso l'utilizzo di una Rete Bayesiana attraverso la quale fare le dovute inferenze e conseguentemente predire il risultato di una partita combattuta fra due squadre di calcio. Il medesimo approccio potrebbe essere riutilizzato in altri sport o giochi che prevedano l'interazione fra più squadre di cui si conoscono le statistiche di ciascun giocatore.
-
-
+\vspace{\stretch{2}} \null
 
 \clearpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\clearpage
+\listoffigures
+\listoftables
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
@@ -428,7 +433,7 @@ Le analisi e le elaborazioni sui dati presentate nel seguito di questo capitolo 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.4]{images/soccer-field-horizontal.png}
+	\includegraphics[scale=0.7]{images/soccer-field-horizontal.png}
 	\caption[Suddivisione del campo da calcio in ruoli]{Suddivisione del campo da calcio in ruoli}
 	\label{fig:soccer-field}
 \end{figure}
@@ -486,6 +491,7 @@ In figura \ref{img:dataset-def-corr} è possibile osservare la matrice di correl
 	\label{img:dataset-def-corr}
 \end{figure}
 
+\pagebreak
 Infine, nella figura \ref{img:dataset-atk-corr} viene presentata la correlazione fra \texttt{overall\_rating} e le abilità di un attaccante, cioè un giocatore non-portiere con un punteggio massimo di 50 su \texttt{marking} e minimo di 50 su \texttt{finishing}. Questa volta si nota che le abilità difensive non hanno alcuna influenza sul punteggio globale, a differenza di quanto avvenga invece per le abilità più legate ai tiri in porta, al dribbling e alla velocità di corsa, che erano decisamente meno influenti per i difensori.
 
 \begin{figure}[H]
@@ -685,9 +691,10 @@ Per completezza, si cita qui anche la funzione \texttt{cpdist}, con firma identi
 \subsubsection{Qualche esempio}
 \label{sec:inference-examples}
 
-A scopo dimostrativo, si presentano in questa sede alcune delle inferenze che è possibile produrre attraverso la libreria \texttt{bnlearn} e l'ultima rete mostrata. I seguenti esempi sono stati generati attraverso l'interfaccia grafica che sarà spiegata nel capitolo \ref{sec:ui}.
+A scopo dimostrativo, si presentano in questa sede alcune delle inferenze che è possibile produrre attraverso la libreria \texttt{bnlearn} e l'ultima rete mostrata. I seguenti esempi sono stati generati attraverso la demo spiegata nel capitolo \ref{sec:ui}.
 
 \begin{verbatim}
+
 P(winner = home | home_mid = terrible, away_mid = good) = 0.184466
 P(winner = home | home_mid = terrible, away_mid = terrible) = 0.3825503
 P(winner = home | home_mid = terrible, away_mid = excellent) = 0.1244541
@@ -695,11 +702,23 @@ P(winner = home | home_gk = very good, away_gk = terrible) = 0.6796657
 P(winner = home | home_atk = good, away_gk = excellent) = 0.3128295
 P(winner = home | home_atk = good, away_gk = good) = 0.4764493
 P(winner = not home | home_mid = terrible, away_mid = excellent) = 0.908642
+
+P(away_mid = excellent | winner = home) = 0.1135857
+P(away_mid = bad | winner = home) = 0.2147429
+
+P(away_def = good | away_mid = excellent) = 0.05091741
+P(away_def = good | away_mid = terrible) = 0.001147955
+
+P(home_mid = excellent | winner = home, home_def = good) = 0.1033894
+P(home_mid = bad | winner = home, home_def = excellent) = 0.001690531
+
 \end{verbatim}
 
-Dai risultati, è possibile facilmente notare come la Rete sia in grado di stimare la probabilità che la squadra di casa sia vincente, sulla base dei valori attribuiti alle diverse variabili secondo la discretizzazione che sarà spiegata nel capitolo \ref{sec:perf-discret}. Gli esempi considerano il problema binario, per cui la squadra che gioca in casa può vincere o non vincere (ma senza sapere se si tratti di un pareggio o una sconfitta).
+Dalle prime query è possibile facilmente notare come la Rete sia in grado di stimare la probabilità che la squadra di casa sia vincente, sulla base dei valori attribuiti alle diverse variabili secondo la discretizzazione che sarà spiegata nel capitolo \ref{sec:perf-discret}. Gli esempi considerano il problema binario, per cui la squadra che gioca in casa può vincere o non vincere (ma senza sapere se si tratti di un pareggio o una sconfitta).
 
 Osservando le probabilità stimate dalla Rete si potrebbe affermare che queste siano effettivamente plausibili rispetto alle evidenze, avendo una conoscenza a priori del dominio che permette di valutare come le diverse componenti di una squadra possano influire sul risultato della partita.
+
+Oltre a quella \textbf{causale} su \texttt{WINNER}, vengono sopra riportati anche alcuni esempi di inferenza \textbf{diagnostica}, \textbf{intercausale} e \textbf{diagnostica+causale}. Si ricorda che la rete di riferimento è quella in figura \ref{img:hc-bin-bl}.
 
 
 
@@ -730,7 +749,7 @@ L'apprendimento della struttura della Rete è quasi istantaneo per tutti gli alg
 
 Anche i tempi per effettuare predizioni e inferenze sul modello già appreso sono pressoché insignificanti per tutte le alternative provate.
 
-Alla luce di queste considerazioni, il tempo è una metrica piuttosto ininfluente per il caso in esame. L'unica accortezza necessaria è quella di evitare la generazione di strutture particolarmente dense di connessioni, pratica che rappresenta comunque una cattiva scelta anche dal punto di vista dell'accuratezza del modello che ne risulterebbe.
+Alla luce di queste considerazioni, il tempo è una metrica piuttosto ininfluente per il caso in esame. L'unica accortezza necessaria è quella di evitare la generazione di strutture con troppi archi, pratica che rappresenta comunque una cattiva scelta anche dal punto di vista dell'accuratezza del modello che ne risulterebbe.
 
 
 \subsubsection{Problema ternario o binario}
@@ -739,7 +758,7 @@ Come accennato nel precedente capitolo, il dataset utilizzato per apprendere la 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.6]{images/06_01_target-distr.png}
+	\includegraphics[scale=0.5]{images/06_01_target-distr.png}
 	\caption[Distribuzione della variabile target]{Distribuzione della variabile target}
 	\label{img:perf-target-distr}
 \end{figure}
@@ -778,6 +797,7 @@ Poiché con tale configurazione le uniche variabili collegate al nodo target \te
 
 Fra le varie alternative, nessuna è risultata in termini di \textit{accuracy} più performante rispetto alla Rete originale, che si attesta intorno al 60\%. Per questo motivo, si è dedotto che la rete ottenuta attraverso \textit{hill climbing} con un ridotto numero di archi fosse la migliore, e pertanto anche la semplicità della Rete stessa sia da preferire quando si ha a che fare con modelli Bayesiani.
 
+\pagebreak
 Nella figura \ref{fig:hc-bin-all} è possibile osservare un esempio di Rete fra quelle testate, in cui tutti i nodi sono collegati alla variabile target secondo un'assunzione per cui ognuno di questi dovrebbe avere influenza sul risultato di una partita. Questa Rete si è rivelata tuttavia considerevolmente peggiore, con un'\textit{accuracy} intorno al 55\% e dei tempi di stima delle CPT decisamente più importanti, con alcune righe addirittura impossibili da calcolare.
 
 \begin{figure}[H]
@@ -897,7 +917,7 @@ Calcolando tali valori su 10 fold e mediandone i risultati, si ottiene un'\texti
 
 \begin{table}[H]
 	\centering
-	\caption{10 fold cross validation SVM}
+	\caption{10 fold cross validation sul problema binario}
 	\begin{tabular}{l|llll}
 		\hline
 		Classe & Precision & Recall & F1 \\
